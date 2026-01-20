@@ -3,3 +3,25 @@ title: "Testing_Ramsay"
 output: html_document
 ---
 
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+
+# Homework 1 STAT338 - Ramsay Barlow
+
+
+## Question 1
+
+### Part A
+```{r}
+
+# This is a test of push/pull
+
+```
+
+### Part B
+```{r}
+
+
+```
