@@ -20,6 +20,8 @@ knitr::opts_chunk$set(echo = TRUE)
 # Testing
 # Testing commit
 
+# TESTING PUSH FROM CLASS
+
 ```
 
 ### Part B
