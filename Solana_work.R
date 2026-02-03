@@ -154,11 +154,92 @@ ggplot(sleep_plot_data, aes(x = angle, y = 1, color = type)) +
                "2PM","4PM","6PM","8PM","10PM")
   ) +
   scale_color_manual(values = c("Onset_circ"="darkblue", "Offset_circ"="darkgoldenrod2"),
-                     labels = c("Start Time", "End Time")) +
+                     labels = c("End Time", "Start Time")) +
   theme_minimal() +
   theme(axis.title = element_blank(),
         axis.text.y = element_blank(),
         axis.ticks = element_blank()) +
   labs(title = "Sleep Start and End Times (Clock View)", color = "")
 
+
+
+#Nap start plot----
+Nap_S_circ = atan2(Nap_S_sin, Nap_S_cos)
+Nap_E_circ = atan2(Nap_E_sin, Nap_E_cos)
+library(dplyr)
+
+sleep_data <- sleep_data %>%
+  mutate(
+    Nap_S_circ = atan2(Nap_S_sin, Nap_S_cos),  
+    Nap_S_circ = ifelse(Nap_S_circ < 0, Nap_S_circ + 2*pi, Nap_S_circ),  
+    nap_start_hour  = Nap_S_circ * 24 / (2*pi),     
+    
+    Nap_E_circ = atan2(Nap_E_sin, Nap_E_cos),  
+    Nap_E_circ = ifelse(Nap_E_circ < 0, Nap_E_circ + 2*pi, Nap_E_circ),  
+    nap_end_hour  = Nap_E_circ * 24 / (2*pi)     
+  )
+
+library(ggplot2)
+
+ggplot(sleep_data, aes(x = Nap_S_circ, y = 1)) +  
+  geom_point(size = 3, color = "blue") +
+  coord_polar(theta = "x", start = -pi/2) +  
+  scale_x_continuous(
+    limits = c(0, 2*pi),
+    breaks = (0:11) * 2*pi/12,                
+    labels = c("12AM","2AM","4AM","6AM","8AM","10AM","12PM","2PM","4PM","6PM","8PM","10PM")
+  ) +
+  theme_minimal() +
+  labs(title = "Nap Start Times (Clock View)") +
+  theme(axis.title = element_blank(),
+        axis.text.y = element_blank(),
+        axis.ticks = element_blank()
+  )
+
+
+
+#Nap End plot better----
+
+ggplot(sleep_data, aes(x = Nap_E_circ, y = 1)) +  
+  geom_point(size = 3, color = "blue") +
+  coord_polar(theta = "x", start = -pi/2) +  
+  scale_x_continuous(
+    limits = c(0, 2*pi),
+    breaks = (0:11) * 2*pi/12,                
+    labels = c("12AM","2AM","4AM","6AM","8AM","10AM","12PM","2PM","4PM","6PM","8PM","10PM")
+  ) +
+  theme_minimal() +
+  labs(title = "Sleep Start Times (Clock View)") +
+  theme(axis.title = element_blank(),
+        axis.text.y = element_blank(),
+        axis.ticks = element_blank())
+
+#Nap Start and end plot----
+
+library(ggplot2)
+
+
+nap_plot_data <- sleep_data %>%
+  select(Nap_S_circ, Nap_E_circ) %>%
+  mutate(id = row_number()) %>%
+  tidyr::pivot_longer(cols = c(Nap_S_circ, Nap_E_circ),
+                      names_to = "type", values_to = "angle") 
+
+
+ggplot(nap_plot_data, aes(x = angle, y = 1, color = type)) +
+  geom_point(size = 3, alpha = 0.7) +
+  coord_polar(theta = "x", start = -pi/2) +  
+  scale_x_continuous(
+    limits = c(0, 2*pi),
+    breaks = (0:11) * 2*pi/12,
+    labels = c("12AM","2AM","4AM","6AM","8AM","10AM","12PM",
+               "2PM","4PM","6PM","8PM","10PM")
+  ) +
+  scale_color_manual(values = c("Nap_E_circ"="darkgoldenrod2", "Nap_S_circ"="darkblue"),
+                     labels = c("Nap End Time", "Nap Start Time")) +
+  theme_minimal() +
+  theme(axis.title = element_blank(),
+        axis.text.y = element_blank(),
+        axis.ticks = element_blank()) +
+  labs(title = "Nap Start and End Times (Clock View)", color = "")
 
