@@ -1,12 +1,12 @@
+# START UP----
+library(readxl)
 
-#START UP----
-sleep_data <- read.csv("./Jan 2026 COPY PUSHAdolescentDailyDiary_DATA_LABELS_7.2.2024_CLEANING_JA_KALIKA_11.24.csv", 
-                       na.strings = c("-999", "-888"))
+# Use read_excel instead of read.csv
+sleep_data <- read_excel(file.choose(), na = c("-999", "-888"))
+names(sleep_data) <- make.names(names(sleep_data))
 
+# Check if the structure looks correct now (should see numeric columns)
 str(sleep_data)
-summary(sleep_data)
-colSums(is.na(sleep_data))
-
 
 #ROUNDING TIME----
 #--Onset times ----
