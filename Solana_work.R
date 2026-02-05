@@ -1,6 +1,6 @@
 
 #START UP----
-sleep_data <- read.csv("./Jan 2026 COPY PUSHAdolescentDailyDiary_DATA_LABELS_7.2.2024_CLEANING_JA_KALIKA_11.24.csv", 
+sleep_data <- read.csv(file.choose(), 
                        na.strings = c("-999", "-888"))
 
 str(sleep_data)
@@ -101,7 +101,7 @@ sleep_data <- sleep_data %>%
 library(ggplot2)
 
 ggplot(sleep_data, aes(x = Onset_circ, y = 1)) +  
-  geom_point(size = 3, color = "blue") +
+  geom_point(size = 3, color = "darkblue") +
   coord_polar(theta = "x", start = -pi/2) +  
   scale_x_continuous(
     limits = c(0, 2*pi),
@@ -120,7 +120,7 @@ ggplot(sleep_data, aes(x = Onset_circ, y = 1)) +
 #End plot better----
 
 ggplot(sleep_data, aes(x = Offset_circ, y = 1)) +  
-  geom_point(size = 3, color = "blue") +
+  geom_point(size = 3, color = "darkgoldenrod2") +
   coord_polar(theta = "x", start = -pi/2) +  
   scale_x_continuous(
     limits = c(0, 2*pi),
@@ -154,7 +154,7 @@ ggplot(sleep_plot_data, aes(x = angle, y = 1, color = type)) +
                "2PM","4PM","6PM","8PM","10PM")
   ) +
   scale_color_manual(values = c("Onset_circ"="darkblue", "Offset_circ"="darkgoldenrod2"),
-                     labels = c("End Time", "Start Time")) +
+                     labels = c("Wake Up Times", "Sleep Times")) +
   theme_minimal() +
   theme(axis.title = element_blank(),
         axis.text.y = element_blank(),
@@ -182,7 +182,7 @@ sleep_data <- sleep_data %>%
 library(ggplot2)
 
 ggplot(sleep_data, aes(x = Nap_S_circ, y = 1)) +  
-  geom_point(size = 3, color = "blue") +
+  geom_point(size = 3, color = "darkblue") +
   coord_polar(theta = "x", start = -pi/2) +  
   scale_x_continuous(
     limits = c(0, 2*pi),
@@ -242,4 +242,6 @@ ggplot(nap_plot_data, aes(x = angle, y = 1, color = type)) +
         axis.text.y = element_blank(),
         axis.ticks = element_blank()) +
   labs(title = "Nap Start and End Times (Clock View)", color = "")
+
+
 
