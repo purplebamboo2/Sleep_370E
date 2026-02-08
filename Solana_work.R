@@ -243,3 +243,28 @@ ggplot(nap_plot_data, aes(x = angle, y = 1, color = type)) +
         axis.ticks = element_blank()) +
   labs(title = "Nap Start and End Times (Clock View)", color = "")
 
+
+
+#Mean Onset hr----
+mean_onset_sin <- mean(Onset_sin, na.rm = TRUE)
+mean_onset_cos <- mean(Onset_cos, na.rm = TRUE)
+
+mean_onset_angle <- atan2(mean_onset_sin, mean_onset_cos)
+
+if(mean_onset_angle < 0) mean_onset_angle <- mean_onset_angle + 2*pi
+
+mean_onset_hour <- mean_onset_angle * 24 / (2*pi)
+
+mean_onset_hour
+
+#Mean Offset hr----
+mean_offset_sin <- mean(Offset_sin, na.rm = TRUE)
+mean_offset_cos <- mean(Offset_cos, na.rm = TRUE)
+
+mean_offset_angle <- atan2(mean_offset_sin, mean_offset_cos)
+
+if(mean_offset_angle < 0) mean_offset_angle <- mean_offset_angle + 2*pi
+
+mean_offset_hour <- mean_offset_angle * 24 / (2*pi)
+
+mean_offset_hour
