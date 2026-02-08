@@ -1,12 +1,13 @@
+# START UP----
+library(readxl)
 
-#START UP----
-sleep_data <- read.csv(file.choose(), 
-                       na.strings = c("-999", "-888"))
-
-str(sleep_data)
+# Use read_excel instead of read.csv
+sleep_data <- read_excel(file.choose(), na = c("-999", "-888"))
+names(sleep_data) <- make.names(names(sleep_data))
 summary(sleep_data)
-colSums(is.na(sleep_data))
 
+# Check if the structure looks correct now (should see numeric columns)
+str(sleep_data)
 
 #ROUNDING TIME----
 #--Onset times ----
@@ -101,7 +102,7 @@ sleep_data <- sleep_data %>%
 library(ggplot2)
 
 ggplot(sleep_data, aes(x = Onset_circ, y = 1)) +  
-  geom_point(size = 3, color = "darkblue") +
+  geom_point(size = 3, color = "blue") +
   coord_polar(theta = "x", start = -pi/2) +  
   scale_x_continuous(
     limits = c(0, 2*pi),
@@ -120,7 +121,7 @@ ggplot(sleep_data, aes(x = Onset_circ, y = 1)) +
 #End plot better----
 
 ggplot(sleep_data, aes(x = Offset_circ, y = 1)) +  
-  geom_point(size = 3, color = "darkgoldenrod2") +
+  geom_point(size = 3, color = "blue") +
   coord_polar(theta = "x", start = -pi/2) +  
   scale_x_continuous(
     limits = c(0, 2*pi),
@@ -154,7 +155,7 @@ ggplot(sleep_plot_data, aes(x = angle, y = 1, color = type)) +
                "2PM","4PM","6PM","8PM","10PM")
   ) +
   scale_color_manual(values = c("Onset_circ"="darkblue", "Offset_circ"="darkgoldenrod2"),
-                     labels = c("Wake Up Times", "Sleep Times")) +
+                     labels = c("End Time", "Start Time")) +
   theme_minimal() +
   theme(axis.title = element_blank(),
         axis.text.y = element_blank(),
@@ -182,7 +183,7 @@ sleep_data <- sleep_data %>%
 library(ggplot2)
 
 ggplot(sleep_data, aes(x = Nap_S_circ, y = 1)) +  
-  geom_point(size = 3, color = "darkblue") +
+  geom_point(size = 3, color = "blue") +
   coord_polar(theta = "x", start = -pi/2) +  
   scale_x_continuous(
     limits = c(0, 2*pi),
@@ -197,7 +198,7 @@ ggplot(sleep_data, aes(x = Nap_S_circ, y = 1)) +
   )
 
 
-
+gi
 #Nap End plot better----
 
 ggplot(sleep_data, aes(x = Nap_E_circ, y = 1)) +  
@@ -242,6 +243,73 @@ ggplot(nap_plot_data, aes(x = angle, y = 1, color = type)) +
         axis.text.y = element_blank(),
         axis.ticks = element_blank()) +
   labs(title = "Nap Start and End Times (Clock View)", color = "")
+
+
+
+#Mean Onset hr----
+mean_onset_sin <- mean(Onset_sin, na.rm = TRUE)
+mean_onset_cos <- mean(Onset_cos, na.rm = TRUE)
+
+mean_onset_angle <- atan2(mean_onset_sin, mean_onset_cos)
+
+if(mean_onset_angle < 0) mean_onset_angle <- mean_onset_angle + 2*pi
+
+mean_onset_hour <- mean_onset_angle * 24 / (2*pi)
+
+mean_onset_hour
+
+#Mean Offset hr----
+mean_offset_sin <- mean(Offset_sin, na.rm = TRUE)
+mean_offset_cos <- mean(Offset_cos, na.rm = TRUE)
+
+mean_offset_angle <- atan2(mean_offset_sin, mean_offset_cos)
+
+if(mean_offset_angle < 0) mean_offset_angle <- mean_offset_angle + 2*pi
+
+mean_offset_hour <- mean_offset_angle * 24 / (2*pi)
+
+mean_offset_hour
+
+
+#Plots----
+physical_model = lm(sleep_data$Sleep.Duration ~ sleep_data$Physical.Activity.Mins, data = sleep_data)
+physical_model
+
+
+ggplot(data = sleep_data, aes(x = Physical.Activity.Mins, y = Sleep.Duration)) +
+  geom_point(color = "blue") +          
+  geom_smooth(method = "lm", col = "red") + 
+  labs(title = "Sleep Duration Vs Physical Activity Duration",
+       x = "Physical Activity (minutes)",
+       y = "Sleep (minutes)") +
+  theme_minimal()   
+
+ggplot(data = sleep_data, aes(x = Sleep.Quality, y = Sleep.Duration)) +
+  geom_point(color = "blue") +          
+  geom_smooth(method = "lm", col = "red") + 
+  labs(title = "Sleep Duration Vs Sleep Quality",
+       x = "Sleep Quality (1-10)",
+       y = "Sleep (minutes)") +
+  theme_minimal()   
+
+ggplot(data = sleep_data, aes(x = Alertness.Rating, y = Sleep.Duration)) +
+  geom_point(color = "blue") +          
+  geom_smooth(method = "lm", col = "red") + 
+  labs(title = "Sleep Duration Vs Alertness",
+       x = "Alertness Rating (1-10)",
+       y = "Sleep (minutes)") +
+  theme_minimal()   
+
+ggplot(data = sleep_data, aes(x = Wake.Difficulty.Rating, y = Sleep.Duration)) +
+  geom_point(color = "blue") +          
+  geom_smooth(method = "lm", col = "red") + 
+  labs(title = "Sleep Duration Vs Alertness",
+       x = "Wake Difficulty rating (1-10)",
+       y = "Sleep (minutes)") +
+  theme_minimal()   
+
+
+
 
 
 
