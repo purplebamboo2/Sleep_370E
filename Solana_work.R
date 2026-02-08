@@ -4,6 +4,7 @@ library(readxl)
 # Use read_excel instead of read.csv
 sleep_data <- read_excel(file.choose(), na = c("-999", "-888"))
 names(sleep_data) <- make.names(names(sleep_data))
+summary(sleep_data)
 
 # Check if the structure looks correct now (should see numeric columns)
 str(sleep_data)
