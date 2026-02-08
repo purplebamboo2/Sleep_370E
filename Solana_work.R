@@ -269,3 +269,47 @@ if(mean_offset_angle < 0) mean_offset_angle <- mean_offset_angle + 2*pi
 mean_offset_hour <- mean_offset_angle * 24 / (2*pi)
 
 mean_offset_hour
+
+
+#Plots----
+physical_model = lm(sleep_data$Sleep.Duration ~ sleep_data$Physical.Activity.Mins, data = sleep_data)
+physical_model
+
+
+ggplot(data = sleep_data, aes(x = Physical.Activity.Mins, y = Sleep.Duration)) +
+  geom_point(color = "blue") +          
+  geom_smooth(method = "lm", col = "red") + 
+  labs(title = "Sleep Duration Vs Physical Activity Duration",
+       x = "Physical Activity (minutes)",
+       y = "Sleep (minutes)") +
+  theme_minimal()   
+
+ggplot(data = sleep_data, aes(x = Sleep.Quality, y = Sleep.Duration)) +
+  geom_point(color = "blue") +          
+  geom_smooth(method = "lm", col = "red") + 
+  labs(title = "Sleep Duration Vs Sleep Quality",
+       x = "Sleep Quality (1-10)",
+       y = "Sleep (minutes)") +
+  theme_minimal()   
+
+ggplot(data = sleep_data, aes(x = Alertness.Rating, y = Sleep.Duration)) +
+  geom_point(color = "blue") +          
+  geom_smooth(method = "lm", col = "red") + 
+  labs(title = "Sleep Duration Vs Alertness",
+       x = "Alertness Rating (1-10)",
+       y = "Sleep (minutes)") +
+  theme_minimal()   
+
+ggplot(data = sleep_data, aes(x = Wake.Difficulty.Rating, y = Sleep.Duration)) +
+  geom_point(color = "blue") +          
+  geom_smooth(method = "lm", col = "red") + 
+  labs(title = "Sleep Duration Vs Alertness",
+       x = "Wake Difficulty rating (1-10)",
+       y = "Sleep (minutes)") +
+  theme_minimal()   
+
+
+
+
+
+
