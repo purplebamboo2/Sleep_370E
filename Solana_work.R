@@ -284,6 +284,10 @@ ggplot(data = sleep_data, aes(x = Physical.Activity.Mins, y = Sleep.Duration)) +
        y = "Sleep (minutes)") +
   theme_minimal()   
 
+results <- cor.test(sleep_data$Sleep.Duration, sleep_data$Physical.Activity.Mins, method = "pearson")
+print(results)
+
+
 ggplot(data = sleep_data, aes(x = Sleep.Quality, y = Sleep.Duration)) +
   geom_point(color = "blue") +          
   geom_smooth(method = "lm", col = "red") + 
@@ -292,23 +296,30 @@ ggplot(data = sleep_data, aes(x = Sleep.Quality, y = Sleep.Duration)) +
        y = "Sleep (minutes)") +
   theme_minimal()   
 
+results_1 <- cor.test(sleep_data$Sleep.Duration, sleep_data$Sleep.Quality, method = "spearman")
+print(results_1)
+
 ggplot(data = sleep_data, aes(x = Alertness.Rating, y = Sleep.Duration)) +
   geom_point(color = "blue") +          
   geom_smooth(method = "lm", col = "red") + 
   labs(title = "Sleep Duration Vs Alertness",
        x = "Alertness Rating (1-10)",
        y = "Sleep (minutes)") +
-  theme_minimal()   
+  theme_minimal()
+
+results_2 <- cor.test(sleep_data$Sleep.Duration, sleep_data$Alertness.Rating, method = "spearman")
+print(results_2)
 
 ggplot(data = sleep_data, aes(x = Wake.Difficulty.Rating, y = Sleep.Duration)) +
   geom_point(color = "blue") +          
   geom_smooth(method = "lm", col = "red") + 
-  labs(title = "Sleep Duration Vs Alertness",
+  labs(title = "Sleep Duration Vs Wake Difficulty",
        x = "Wake Difficulty rating (1-10)",
        y = "Sleep (minutes)") +
   theme_minimal()   
 
-
+results_3 <- cor.test(sleep_data$Sleep.Duration, sleep_data$Wake.Difficulty.Rating, method = "spearman")
+print(results_3)
 
 
 
