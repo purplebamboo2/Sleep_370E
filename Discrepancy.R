@@ -84,9 +84,15 @@ identical(new_data, kalinka)
 which(!(new_data == kalinka) | (is.na(new_data) != is.na(kalinka)), arr.ind = TRUE)
 which(new_data != kalinka, arr.ind = TRUE)
 
+sum((new_data != kalinka) | (is.na(new_data) != is.na(kalinka)), na.rm = TRUE)
+
+
 identical(new_data, rayaan)
 which(!(new_data == rayaan) | (is.na(new_data) != is.na(rayaan)), arr.ind = TRUE)
 which(new_data != rayaan, arr.ind = TRUE)
+
+sum((new_data != rayaan) | (is.na(new_data) != is.na(rayaan)), na.rm = TRUE)
+
 
 
 
