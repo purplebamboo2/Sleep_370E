@@ -62,6 +62,12 @@ for (col in names(kalinka)) {
   rayaan[[col]] <- as(rayaan[[col]], class(rayaan[[col]])[1])
 }
 
+identical(rayaan, kalinka) 
+which(!(rayaan == kalinka) | (is.na(rayaan) != is.na(kalinka)), arr.ind = TRUE) 
+which(rayaan != kalinka, arr.ind = TRUE)
+
+sum((rayaan != kalinka) | (is.na(rayaan) != is.na(kalinka)), na.rm = TRUE)
+
 
 
 #Merged data creation
@@ -70,6 +76,8 @@ new_data <- kalinka
 for (col in names(kalinka)) {
   new_data[[col]][is.na(new_data[[col]])] <- rayaan[[col]][is.na(new_data[[col]])]
 }
+
+
 
 #Discrepancy analysis
 identical(new_data, kalinka)
