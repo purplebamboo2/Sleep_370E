@@ -1,9 +1,49 @@
 # START UP----
 library(readxl)
+library(dplyr)
+library(ggplot2)
 
-# Use read_excel instead of read.csv
-sleep_data <- read_excel(file.choose(), na = c("-999", "-888"))
+# Prefer using cleaned data from Discrepancy.R if it is already in memory.
+if (exists("new_data")) {
+  sleep_data <- new_data
+} else {
+  sleep_data <- read_excel(file.choose(), na = c("-999", "-888"))
+}
+
 names(sleep_data) <- make.names(names(sleep_data))
+
+time_cols <- c(
+  "Sleep.Onset.Decimal.Hour",
+  "Sleep.Offset.Time_Decimal.Hour",
+  "Nap.Start.Decimal.Time",
+  "Nap.End.Decimal.Time",
+  "First.Meal.Decimal.Time",
+  "Last.Meal.Decimal.Time"
+)
+
+analysis_numeric_cols <- c(
+  "Sleep.Duration",
+  "Physical.Activity.Mins",
+  "Sleep.Quality",
+  "Alertness.Rating",
+  "Wake.Difficulty.Rating"
+)
+
+numeric_cols <- unique(c(time_cols, analysis_numeric_cols))
+
+missing_cols <- setdiff(numeric_cols, names(sleep_data))
+if (length(missing_cols) > 0) {
+  stop(paste("Missing required numeric columns:", paste(missing_cols, collapse = ", ")))
+}
+
+to_numeric_clean <- function(x) {
+  x <- as.character(x)
+  x[x %in% c("L", "-999", "-888", "")] <- NA
+  suppressWarnings(as.numeric(x))
+}
+
+sleep_data[numeric_cols] <- lapply(sleep_data[numeric_cols], to_numeric_clean)
+
 summary(sleep_data)
 
 # Check if the structure looks correct now (should see numeric columns)
@@ -85,9 +125,6 @@ plot(Last_M_cos, Last_M_sin,
 #Start plot better----
 Onset_circ <- atan2(Onset_sin, Onset_cos)
 
-
-library(dplyr)
-
 sleep_data <- sleep_data %>%
   mutate(
     Onset_circ = atan2(Onset_sin, Onset_cos),  
@@ -98,8 +135,6 @@ sleep_data <- sleep_data %>%
     Offset_circ = ifelse(Offset_circ < 0, Offset_circ + 2*pi, Offset_circ),  
     end_hour  = Offset_circ * 24 / (2*pi)     
   )
-
-library(ggplot2)
 
 ggplot(sleep_data, aes(x = Onset_circ, y = 1)) +  
   geom_point(size = 3, color = "blue") +
@@ -135,9 +170,6 @@ ggplot(sleep_data, aes(x = Offset_circ, y = 1)) +
         axis.ticks = element_blank())
 #Start and end plot----
 
-library(ggplot2)
-
-
 sleep_plot_data <- sleep_data %>%
   select(Onset_circ, Offset_circ) %>%
   mutate(id = row_number()) %>%
@@ -167,7 +199,6 @@ ggplot(sleep_plot_data, aes(x = angle, y = 1, color = type)) +
 #Nap start plot----
 Nap_S_circ = atan2(Nap_S_sin, Nap_S_cos)
 Nap_E_circ = atan2(Nap_E_sin, Nap_E_cos)
-library(dplyr)
 
 sleep_data <- sleep_data %>%
   mutate(
@@ -179,8 +210,6 @@ sleep_data <- sleep_data %>%
     Nap_E_circ = ifelse(Nap_E_circ < 0, Nap_E_circ + 2*pi, Nap_E_circ),  
     nap_end_hour  = Nap_E_circ * 24 / (2*pi)     
   )
-
-library(ggplot2)
 
 ggplot(sleep_data, aes(x = Nap_S_circ, y = 1)) +  
   geom_point(size = 3, color = "blue") +
@@ -198,7 +227,6 @@ ggplot(sleep_data, aes(x = Nap_S_circ, y = 1)) +
   )
 
 
-gi
 #Nap End plot better----
 
 ggplot(sleep_data, aes(x = Nap_E_circ, y = 1)) +  
@@ -216,9 +244,6 @@ ggplot(sleep_data, aes(x = Nap_E_circ, y = 1)) +
         axis.ticks = element_blank())
 
 #Nap Start and end plot----
-
-library(ggplot2)
-
 
 nap_plot_data <- sleep_data %>%
   select(Nap_S_circ, Nap_E_circ) %>%
@@ -320,7 +345,4 @@ ggplot(data = sleep_data, aes(x = Wake.Difficulty.Rating, y = Sleep.Duration)) +
 
 results_3 <- cor.test(sleep_data$Sleep.Duration, sleep_data$Wake.Difficulty.Rating, method = "spearman")
 print(results_3)
-
-
-
 
