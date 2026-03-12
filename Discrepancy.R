@@ -92,10 +92,11 @@ View(new_data)
 View(kalinka)
 View(rayaan)
 
-#THURSDAY UPDATE
+#Changing Written to Categorical
 library(dplyr)
 library(stringr)
 
+#Sleep Environment
 new_data <- new_data %>%
   mutate(
     Sleep_Env_clean = case_when(
@@ -111,6 +112,7 @@ new_data <- new_data %>%
     )
   )
 
+#Nap Environment
 new_data <- new_data %>%
   mutate(
     Nap_Env_clean = case_when(
@@ -124,6 +126,7 @@ new_data <- new_data %>%
     )
   )
 
+#Additional Comments
 new_data <- new_data %>%
   mutate(
     Additonal_Comments_clean = case_when(
@@ -140,3 +143,4 @@ new_data <- new_data %>%
 
 
 View(new_data)
+
