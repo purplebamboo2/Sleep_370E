@@ -1,7 +1,7 @@
 install.packages("readxl")
 library(readxl)
 
-#Data
+#Data Input ----
 kalinka <- read_excel("./Jan 2026 COPY PUSHAdolescentDailyDiary_DATA_LABELS_7.2.2024_CLEANING_JA_KALIKA_11.24.2025_updated.xlsx")
 rayaan <- read_excel("./Jan 2026 COPY PUSHAdolescentDailyDiary_DATA_LABELS_7.2.2024_CLEANING_JA_RAYAAN_12.12.2025.xlsx")
 kalinka[kalinka == -888] <- NA
@@ -13,10 +13,10 @@ rayaan[rayaan == -555] <- NA
 
 
 
-#Discrepancy Analysis
+#Discrepancy Analysis ----
 all.equal(kalinka, rayaan)
 
-#Fixing Process
+#Fixing Process ----
 
 all(names(kalinka) == names(rayaan))
 intersect(names(kalinka), names(rayaan))
@@ -26,14 +26,13 @@ setdiff(names(kalinka), names(rayaan))
 #rayaan only columns
 setdiff(names(rayaan), names(kalinka))
 
-#column name fixes
+#column name fixes to make them match ----
 names(kalinka)[names(kalinka) == "AdditionalComment"] <- "Additional Comment"
 names(rayaan)[names(rayaan) == "Sleep Enviornment"] <- "Sleep Environment"
 names(rayaan)[names(rayaan) == "Alcoholo Consumption"] <- "Alcohol Consumption"
 
-#kalinka only columns recheck
+#columns recheck ----
 setdiff(names(kalinka), names(rayaan))
-#rayaan only columns recheck
 setdiff(names(rayaan), names(kalinka))
 
 all(names(kalinka) == names(rayaan))
@@ -61,7 +60,7 @@ sum((rayaan != kalinka) | (is.na(rayaan) != is.na(kalinka)), na.rm = TRUE)
 
 
 
-#Merged data creation
+#Merged data creation ----
 new_data <- kalinka
 
 for (col in names(kalinka)) {
@@ -70,7 +69,7 @@ for (col in names(kalinka)) {
 
 
 
-#Discrepancy analysis
+#Discrepancy analysis between new data and old sets ----
 identical(new_data, kalinka)
 which(!(new_data == kalinka) | (is.na(new_data) != is.na(kalinka)), arr.ind = TRUE)
 which(new_data != kalinka, arr.ind = TRUE)
@@ -92,7 +91,7 @@ View(new_data)
 View(kalinka)
 View(rayaan)
 
-#Changing Written to Categorical
+#Changing Written to Categorical ----
 library(dplyr)
 library(stringr)
 
@@ -143,4 +142,13 @@ new_data <- new_data %>%
 
 
 View(new_data)
+
+# Fixing Dates----
+new_data$Date <- as.numeric(new_data$Date)
+new_data$Date <- as.Date(new_data$Date, origin = "1899-12-30")
+
+View(new_data)
+
+
+
 
