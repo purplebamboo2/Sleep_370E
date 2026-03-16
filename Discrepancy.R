@@ -149,6 +149,23 @@ new_data$Date <- as.Date(new_data$Date, origin = "1899-12-30")
 
 View(new_data)
 
+#Rounding ----
+
+library(dplyr)
+new_data <- new_data %>% mutate_if(is.numeric, round, 2)
+View(new_data)
+
+#Merging hours and minutes ----
+new_data <- new_data %>%
+  mutate(
+    TV_Total_Minutes = coalesce(new_data$`TV Movies Hrs`,0)*60 + coalesce(new_data$`TV Movies Mins`,0),
+    Videos_Total_Minutes = coalesce(new_data$`Watch Videos Hrs`,0)*60 + coalesce(new_data$`Watch Videos Mins`,0),
+    VideoGames_Total_Minutes = coalesce(new_data$`Video Games Hrs`,0)*60 + coalesce(new_data$`Video Games Mins`,0),
+    VideoChat_Total_Minutes = coalesce(new_data$`Video Chat Hrs`,0)*60 + coalesce(new_data$`Video Chat Mins`,0),
+    Devices_Total_Minutes = coalesce(new_data$`Devices Hrs`,0)*60 + coalesce(new_data$`Devices Mins`,0),
+    SocialMedia_Total_Minutes = coalesce(new_data$`Social Media Hrs`,0)*60 + coalesce(new_data$`Social Media Mins`,0)
+  )
+View(new_data)
 
 
 
