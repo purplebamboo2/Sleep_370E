@@ -167,5 +167,141 @@ new_data <- new_data %>%
   )
 View(new_data)
 
+#Online data add/first checks ----
+online <- read_excel("./FINAL ONLINE PUSHAdolescentDailyDiary_3.9.2026.xlsx")
+View(online)
+
+
+all.equal(new_data, online)
+
+all(names(new_data) == names(online))
+intersect(names(new_data), names(online))
+
+#new_data only columns
+setdiff(names(new_data), names(online))
+#online only columns
+setdiff(names(online), names(new_data))
+
+
+#Fixing online data to match new_data columns ----
+#names
+
+names(online)[names(online) == "AdditionalComment"] <- "Additional Comment"
+names(online)[names(online) == "Sleep Enviornment"] <- "Sleep Environment"
+
+#check
+
+#new_data only columns
+setdiff(names(new_data), names(online))
+#online only columns
+setdiff(names(online), names(new_data))
+
+#Categorical Changes
+library(dplyr)
+library(stringr)
+
+#Sleep Environment
+online <- online %>%
+  mutate(
+    Sleep_Env_clean = case_when(
+      str_detect(`Sleep Environment`, regex("my bed|my room|at my house|in my bed|home|bed|bed-bedroom|bedroom-bed|in the bedroom|bedroom/bed|bedroom|bedroom at home|bed in bedroom (home)|home|my home", ignore_case = TRUE)) ~ 1,
+      str_detect(`Sleep Environment`, regex("mom", ignore_case = TRUE)) ~ 2,
+      str_detect(`Sleep Environment`, regex("dad", ignore_case = TRUE)) ~ 3,
+      str_detect(`Sleep Environment`, regex("aunt|grandma|grandparent|family", ignore_case = TRUE)) ~ 4,
+      str_detect(`Sleep Environment`, regex("hotel|dorm", ignore_case = TRUE)) ~ 5,
+      str_detect(`Sleep Environment`, regex("friend", ignore_case = TRUE)) ~ 6,
+      str_detect(`Sleep Environment`, regex("couch", ignore_case = TRUE)) ~ 7,
+      str_detect(`Sleep Environment`, regex("good|decent", ignore_case = TRUE)) ~ NA_real_,
+      TRUE ~ NA_real_
+    )
+  )
+
+#Nap Environment
+online <- online %>%
+  mutate(
+    Nap_Env_clean = case_when(
+      str_detect(`Nap Enviornment`, regex("bed|room|home|my room", ignore_case = TRUE)) ~ 1,
+      str_detect(`Nap Enviornment`, regex("couch|my couch|on the couch", ignore_case = TRUE)) ~ 2,
+      str_detect(`Nap Enviornment`, regex("dorm", ignore_case = TRUE)) ~ 3,
+      str_detect(`Nap Enviornment`, regex("movie", ignore_case = TRUE)) ~ 4,
+      str_detect(`Nap Enviornment`, regex("class", ignore_case = TRUE)) ~ 5,
+      str_detect(`Nap Enviornment`, regex("car", ignore_case = TRUE)) ~ 6,
+      TRUE ~ NA_real_
+    )
+  )
+
+#Additional Comments
+online <- online %>%
+  mutate(
+    Additonal_Comments_clean = case_when(
+      str_detect(`Additional Comment`, regex("actigraph|did not wear", ignore_case = TRUE)) ~ 1,
+      str_detect(`Additional Comment`, regex("menstrual|period|I'm sick, started my period", ignore_case = TRUE)) ~ 2,
+      str_detect(`Additional Comment`, regex("not feeling well|sick", ignore_case = TRUE)) ~ 3,
+      str_detect(`Additional Comment`, regex("difficult day|hard day", ignore_case = TRUE)) ~ 4,
+      str_detect(`Additional Comment`, regex("good day|felt better, made cake|good day, better than usual", ignore_case = TRUE)) ~ 5,
+      str_detect(`Additional Comment`, regex("exercise|practice|sport|activity|went to art school, walked a lot", ignore_case = TRUE)) ~ 6,
+      str_detect(`Additional Comment`, regex("No|None", ignore_case = TRUE)) ~ NA_real_,
+      TRUE ~ NA_real_
+    )
+  )
+
+#check
+
+#new_data only columns
+setdiff(names(new_data), names(online))
+#online only columns
+setdiff(names(online), names(new_data))
+
+
+#Rounding
+
+library(dplyr)
+online <- online %>% mutate_if(is.numeric, round, 2)
+
+
+#Merging hours and minutes online
+online <- online %>%
+  mutate(
+    TV_Total_Minutes = coalesce(online$`TV Movies Hrs`,0)*60 + coalesce(online$`TV Movies Mins`,0),
+    Videos_Total_Minutes = coalesce(online$`Watch Videos Hrs`,0)*60 + coalesce(online$`Watch Videos Mins`,0),
+    VideoGames_Total_Minutes = coalesce(online$`Video Games Hrs`,0)*60 + coalesce(online$`Video Games Mins`,0),
+    VideoChat_Total_Minutes = coalesce(online$`Video Chat Hrs`,0)*60 + coalesce(online$`Video Chat Mins`,0),
+    Devices_Total_Minutes = coalesce(online$`Devices Hrs`,0)*60 + coalesce(online$`Devices Mins`,0),
+    SocialMedia_Total_Minutes = coalesce(online$`Social Media Hrs`,0)*60 + coalesce(online$`Social Media Mins`,0)
+  )
+View(online)
+
+#check
+
+#new_data only columns
+setdiff(names(new_data), names(online))
+#online only columns
+setdiff(names(online), names(new_data))
+
+names(online)[names(online) == "...44"] <- "online complete?"
+names(online)[names(online) == "...45"] <- "online date?"
+
+new_data$DELETE <- NULL
+online$"Academic Year" <- NA
+new_data$"online complete?" <- NA
+new_data$"online date?" <- NA
+
+#final check
+
+#new_data only columns
+setdiff(names(new_data), names(online))
+#online only columns
+setdiff(names(online), names(new_data))
+
+#Combined data set/pushing to git ----
+combined <- rbind(new_data, online)
+View(combined)
+
+install.packages("writexl")
+library(writexl)
+write_xlsx(combined, "combined_data.xlsx")
+
+
+
 
 
