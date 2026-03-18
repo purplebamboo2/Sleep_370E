@@ -4,7 +4,9 @@ library(ggplot2)
 
 actigraphy_data <- read_excel("./PUSH_ACTIGRAPH_Long_FINAL_02.23.26.xlsx")
 
-View("./PUSH_ACTIGRAPH_Long_FINAL_02.23.26.xlsx")
+View(actigraphy_data)   # Opens the dataset in RStudio's data viewer
+head(actigraphy_data)   # Optional: shows first 6 rows in the console
+str(actigraphy_data)    # Optional: shows the variable structure
 
 numeric_cols <- names(actigraphy_data)[sapply(actigraphy_data, is.numeric)]
 
