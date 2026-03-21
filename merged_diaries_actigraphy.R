@@ -1,12 +1,15 @@
+## Packages
 library(readxl)
 library(dplyr)
 library(stringr)
 library(writexl)
 
+## File paths
 diary_path <- "./combined_data.xlsx"
 actigraphy_path <- "./PUSH_ACTIGRAPH_Long_FINAL_02.23.26.xlsx"
 output_path <- "./merged_diaries_actigraphy.xlsx"
 
+## Input checks
 if (!file.exists(diary_path)) {
   stop("combined_data.xlsx was not found. Run Discrepancy.R first.")
 }
@@ -15,6 +18,7 @@ if (!file.exists(actigraphy_path)) {
   stop("PUSH_ACTIGRAPH_Long_FINAL_02.23.26.xlsx was not found.")
 }
 
+## ID helpers
 normalize_push_id <- function(x) {
   id_digits <- str_extract(as.character(x), "[0-9]+")
 
@@ -29,6 +33,93 @@ normalize_study_day <- function(x) {
   as.integer(str_extract(as.character(x), "[0-9]+"))
 }
 
+## Calendar windows
+# CPS attendance windows used for school-year and summer coding.
+# Summer runs from the day after school ends to the day before classes resume.
+school_year_windows <- data.frame(
+  window_label = c(
+    "2020-2021 School Year",
+    "2021-2022 School Year",
+    "2022-2023 School Year",
+    "2023-2024 School Year"
+  ),
+  start_date = as.Date(c(
+    "2020-09-08",
+    "2021-08-30",
+    "2022-08-22",
+    "2023-08-21"
+  )),
+  end_date = as.Date(c(
+    "2021-06-22",
+    "2022-06-14",
+    "2023-06-07",
+    "2024-06-06"
+  )),
+  stringsAsFactors = FALSE
+)
+
+summer_break_windows <- data.frame(
+  window_label = c(
+    "Summer 2021",
+    "Summer 2022",
+    "Summer 2023"
+  ),
+  start_date = as.Date(c(
+    "2021-06-23",
+    "2022-06-15",
+    "2023-06-08"
+  )),
+  end_date = as.Date(c(
+    "2021-08-29",
+    "2022-08-21",
+    "2023-08-20"
+  )),
+  stringsAsFactors = FALSE
+)
+
+## Calendar helpers
+date_in_windows <- function(date_vector, windows_df) {
+  vapply(
+    date_vector,
+    function(single_date) {
+      if (is.na(single_date)) {
+        return(FALSE)
+      }
+
+      any(
+        single_date >= windows_df$start_date &
+          single_date <= windows_df$end_date
+      )
+    },
+    logical(1)
+  )
+}
+
+## Summer indicator
+classify_summer_break <- function(date_vector) {
+  in_school_year <- date_in_windows(date_vector, school_year_windows)
+  in_summer_break <- date_in_windows(date_vector, summer_break_windows)
+
+  case_when(
+    in_summer_break ~ 1,
+    in_school_year ~ 0,
+    TRUE ~ NA_real_
+  )
+}
+
+## Weekend indicator
+classify_weekend <- function(date_vector) {
+  day_of_week <- as.POSIXlt(date_vector)$wday
+
+  case_when(
+    is.na(date_vector) ~ NA_real_,
+    # Friday and Saturday nights count as weekend nights.
+    day_of_week %in% c(5, 6) ~ 1,
+    TRUE ~ 0
+  )
+}
+
+## Key check
 check_unique_key <- function(data, key_cols, data_name) {
   duplicate_keys <- data %>%
     filter(if_all(all_of(key_cols), ~ !is.na(.x))) %>%
@@ -46,6 +137,7 @@ check_unique_key <- function(data, key_cols, data_name) {
   }
 }
 
+## Read diary data
 diary_data <- read_excel(diary_path) %>%
   mutate(
     merge_participant_id = normalize_push_id(`Participant ID`),
@@ -53,6 +145,7 @@ diary_data <- read_excel(diary_path) %>%
     diary_date = as.Date(Date)
   )
 
+## Read actigraphy data
 actigraphy_data <- read_excel(actigraphy_path) %>%
   mutate(
     merge_participant_id = normalize_push_id(ParticipantID),
@@ -60,9 +153,7 @@ actigraphy_data <- read_excel(actigraphy_path) %>%
     actigraphy_date = as.Date(C_ACTI_Date)
   )
 
-# Both files contain repeated daily rows, so joining on participant ID alone
-# would create a many-to-many merge. Study day is normalized first and used
-# alongside the participant ID as the merge key.
+# Join by participant and study day to avoid many-to-many matches.
 check_unique_key(
   diary_data,
   c("merge_participant_id", "merge_study_day"),
@@ -74,6 +165,31 @@ check_unique_key(
   "Actigraphy data"
 )
 
+## Spreadsheet tracking columns
+# Add front-end tracking columns. Use actigraphy dates first for the
+# seasonal and weekend indicators, then fall back to diary dates.
+add_global_tracking_columns <- function(data) {
+  data %>%
+    mutate(
+      indicator_reference_date = coalesce(actigraphy_date, diary_date),
+      `Global Participant ID` = merge_participant_id,
+      Data_Source = case_when(
+        merge_status == "actigraphy_only" ~ "Actigraphy",
+        merge_status == "diary_only" ~ "Diary",
+        merge_status == "matched" ~ "Both",
+        TRUE ~ "Review"
+      ),
+      Summer_Break_Indicator = classify_summer_break(indicator_reference_date),
+      Weekend_Indicator = classify_weekend(indicator_reference_date),
+      .before = 1
+    ) %>%
+    relocate(Data_Source, .after = `Global Participant ID`) %>%
+    relocate(Summer_Break_Indicator, .after = Data_Source) %>%
+    relocate(Weekend_Indicator, .after = Summer_Break_Indicator) %>%
+    select(-indicator_reference_date)
+}
+
+## Raw merged file
 merged_data <- full_join(
   diary_data,
   actigraphy_data,
@@ -90,19 +206,24 @@ merged_data <- full_join(
     ),
     date_diff_days = as.integer(diary_date - actigraphy_date)
   ) %>%
-  arrange(merge_participant_id, merge_study_day)
+  arrange(merge_participant_id, merge_study_day) %>%
+  add_global_tracking_columns()
 
+## Date gap summary
 date_alignment_summary <- merged_data %>%
   filter(merge_status == "matched") %>%
   count(date_diff_days, name = "n") %>%
   arrange(desc(n), date_diff_days)
 
+## Unmatched diary rows
 diary_only_rows <- merged_data %>%
   filter(merge_status == "diary_only")
 
+## Unmatched actigraphy rows
 actigraphy_only_rows <- merged_data %>%
   filter(merge_status == "actigraphy_only")
 
+## Initial workbook write
 write_xlsx(
   list(
     merged_data = merged_data,
@@ -113,6 +234,7 @@ write_xlsx(
   output_path
 )
 
+## Raw merge counts
 cat("Merged file written to:", output_path, "\n")
 cat("Total rows in merged_data:", nrow(merged_data), "\n")
 cat("Matched rows:", sum(merged_data$merge_status == "matched", na.rm = TRUE), "\n")
@@ -123,21 +245,8 @@ cat("Actigraphy-only rows:", nrow(actigraphy_only_rows), "\n")
 # Best Cleaned Merged Data ----
 # ============================================================
 
-# I wanted this part separated from the raw merge on purpose.
-# The objects above still show the merge exactly as it came out once the
-# participant IDs and study days were lined up. From a data management
-# standpoint, that matters: the raw merge is the audit trail, and the code
-# below is the cleaner analytic version. Keeping the two steps apart makes
-# it much easier to explain later what was truly in the files and what was
-# corrected only after looking at the date patterns.
-
-# This helper is only for the very specific situation where the diary date
-# appears to have the correct month and day but the wrong year.
-# That was the clearest kind of data entry problem in these files
-# (for example, a 2024 actigraphy record paired with a 2014 or 2023 diary
-# date for the same participant and study day).
-# The function keeps the diary month/day intact and borrows only the year
-# from the actigraphy date, which is the more structured date field here.
+## Year repair helper
+# Replace the diary year with the actigraphy year when month and day match.
 replace_year_with_reference <- function(date_to_fix, reference_date) {
   repaired_text <- ifelse(
     is.na(date_to_fix) | is.na(reference_date),
@@ -148,221 +257,133 @@ replace_year_with_reference <- function(date_to_fix, reference_date) {
   as.Date(repaired_text)
 }
 
-# Before filling anything in, I wanted a simple estimate of each
-# participant's usual diary-vs-actigraphy date relationship.
-# In these data, the diary date is often either the same as the actigraphy
-# date or one day later. Both patterns are defensible depending on whether
-# the diary is thought of as a report about the prior night's sleep or the
-# same calendar day.
-#
-# The important point is that I only learn this offset from rows that are
-# already behaving sensibly. I do not want the obviously messy cases to
-# teach the cleaning rule. So I restrict this lookup table to matched rows
-# with date differences of 0 or 1 day only, then I take the most common
-# value for each participant.
-participant_offset_lookup <- merged_data %>%
-  # Start with rows where both sources were present. The unmatched rows are
-  # a coverage issue, not something date cleaning can repair.
-  filter(
-    merge_status == "matched",
-    !is.na(date_diff_days),
-    date_diff_days %in% c(0L, 1L)
-  ) %>%
-  # Count how often each participant shows each acceptable offset.
-  # This gives a very direct summary of the participant's usual pattern.
-  count(
-    merge_participant_id,
-    date_diff_days,
-    name = "n_supporting_rows"
-  ) %>%
-  # Keep the most common offset for each participant.
-  # If someone mostly looks like a "same-day" case, use 0.
-  # If someone mostly looks like a "next-day diary" case, use 1.
-  group_by(merge_participant_id) %>%
-  slice_max(order_by = n_supporting_rows, n = 1, with_ties = FALSE) %>%
-  ungroup() %>%
-  # I only call the offset reliable when it shows up at least twice.
-  # One row by itself feels too thin to justify imputing dates later.
-  mutate(offset_is_reliable = n_supporting_rows >= 2L) %>%
-  # Rename the column so its role is obvious when it gets joined back in.
-  rename(participant_expected_diary_offset_days = date_diff_days)
-
-# This object is the cleaned working table.
-# I keep all matched rows here, even the messy ones, because I still want a
-# place where every matched pair can be reviewed after the cleaning logic is
-# applied. The stricter analysis subset gets created one step later.
+## Clean matched rows
+# Build the cleaned matched file here and keep the raw merge above intact.
 best_cleaned_merged_data <- merged_data %>%
-  # At this stage I am only cleaning rows where diary and actigraphy were
-  # actually paired. The diary-only and actigraphy-only cases belong in
-  # their own review tabs because they are missing-data problems, not date
-  # repair problems.
+  # Clean only the matched rows here.
   filter(merge_status == "matched") %>%
-  # Bring in the participant-level expected offset learned above so it can
-  # be used, if warranted, for missing diary dates.
-  left_join(participant_offset_lookup, by = "merge_participant_id") %>%
   mutate(
-    # Participants with no trustworthy offset estimate should be treated as
-    # unreliable by default. Using FALSE here is safer than leaving NA and
-    # accidentally letting those rows slip into an imputation rule later.
-    offset_is_reliable = coalesce(offset_is_reliable, FALSE),
-
-    # Try the year-only repair up front so we can inspect whether it turns a
-    # clearly impossible mismatch into a plausible one. I am not applying it
-    # yet; I am just generating the candidate repaired date.
+    # Candidate year-only repair.
     year_repaired_diary_date = replace_year_with_reference(
       diary_date,
       actigraphy_date
     ),
 
-    # This tells us how close the repaired diary date would be to the
-    # actigraphy date. If swapping the year suddenly brings the difference
-    # back to 0, 1, or -1 day, that is strong evidence that the original
-    # problem was indeed just the year.
+    # Gap after the year-only repair.
     year_repair_diff_days = as.integer(
       year_repaired_diary_date - actigraphy_date
     ),
 
-    # This flag is intentionally strict.
-    # I only call something an "obvious year typo" when:
-    # 1. the original date gap is huge,
-    # 2. the participant ID and study day already match,
-    # 3. replacing the year produces a date that is now right on top of the
-    #    actigraphy date.
-    #
-    # The logic here is that a 300+ day mismatch is far too large to be a
-    # real nightly alignment issue, but it is exactly the size of problem
-    # you see when the year was typed incorrectly.
+    # Flag large gaps that collapse after swapping the year.
     obvious_year_typo = !is.na(date_diff_days) &
       abs(date_diff_days) >= 300L &
       !is.na(year_repaired_diary_date) &
       year_repair_diff_days %in% c(-1L, 0L, 1L),
 
-    # I wanted one explicit label that says how each row was handled.
-    # That way the final workbook is not just cleaned; it is also legible.
-    # The order matters here:
-    # - First, keep rows that were already acceptable.
-    # - Second, fill in a missing diary date only when a participant-level
-    #   offset looks stable enough to trust.
-    # - Third, repair the obvious year typos.
-    # - Everything else stays unresolved on purpose.
-    cleaning_rule = case_when(
-      !is.na(diary_date) &
-        !is.na(actigraphy_date) &
-        date_diff_days %in% c(0L, 1L) ~ "kept_raw_dates",
-      is.na(diary_date) &
-        !is.na(actigraphy_date) &
-        offset_is_reliable ~ "imputed_missing_diary_date_from_actigraphy",
-      obvious_year_typo ~ "repaired_obvious_diary_year_typo",
-      TRUE ~ "left_unresolved_for_review"
+    # Use actigraphy as the main date when it exists.
+    authoritative_date_source = case_when(
+      !is.na(actigraphy_date) ~ "actigraphy",
+      !is.na(year_repaired_diary_date) ~ "year_repaired_diary",
+      !is.na(diary_date) ~ "raw_diary",
+      TRUE ~ NA_character_
     ),
 
-    # This is the actual cleaned diary date that will travel with the row.
-    # I leave the raw diary date untouched elsewhere in the table and create
-    # a new cleaned version instead, because it is always better to preserve
-    # the original entry for auditing.
-    #
-    # There are only two situations where I replace the raw diary date:
-    # - when the diary date is missing but the participant has a stable,
-    #   well-supported offset from other rows;
-    # - when the raw diary year is obviously wrong and the year-only repair
-    #   brings the date back into a plausible range.
-    #
-    # I deliberately do not invent fixes for the harder cases such as the
-    # PUSH_127 and PUSH_133 patterns. Those rows look inconsistent in ways
-    # that could reflect a shifted sequence, skipped days, or a coding issue,
-    # and I do not think a one-line rule can settle that responsibly.
+    # Main row date for analysis.
+    authoritative_merged_date = coalesce(
+      actigraphy_date,
+      year_repaired_diary_date,
+      diary_date
+    ),
+
+    # Diary-side date after harmonizing to the main row date.
     cleaned_diary_date = case_when(
-      cleaning_rule == "imputed_missing_diary_date_from_actigraphy" ~
-        actigraphy_date + participant_expected_diary_offset_days,
-      cleaning_rule == "repaired_obvious_diary_year_typo" ~
-        year_repaired_diary_date,
+      !is.na(actigraphy_date) ~ actigraphy_date,
+      obvious_year_typo ~ year_repaired_diary_date,
       TRUE ~ diary_date
     ),
 
-    # I keep the actigraphy date unchanged and treat it as the canonical
-    # sleep-episode date in the cleaned file. The reason is practical:
-    # the actigraphy date is already a dedicated nightly variable, whereas
-    # the diary date can behave like either the sleep date or the report
-    # date depending on how the diary was completed.
-    #
-    # To make that distinction explicit, I keep both notions:
-    # - cleaned_sleep_episode_date: the actigraphy-centered date for nightly
-    #   analyses;
-    # - cleaned_diary_report_date: the cleaned diary-side date after any
-    #   imputation or obvious typo repair.
-    cleaned_actigraphy_date = actigraphy_date,
-    cleaned_sleep_episode_date = cleaned_actigraphy_date,
-    cleaned_diary_report_date = cleaned_diary_date,
-
-    # This is just the cleaned version of the date difference, which lets us
-    # check whether the repair actually improved the alignment.
-    cleaned_date_diff_days = as.integer(
-      cleaned_diary_date - cleaned_actigraphy_date
+    # Diary date with only the year repair applied.
+    diary_date_after_minimal_fix = case_when(
+      obvious_year_typo ~ year_repaired_diary_date,
+      TRUE ~ diary_date
     ),
 
-    # This flag is the gatekeeper for the analysis-ready subset.
-    # A row is kept when I am comfortable that the date situation is either:
-    # - already fine,
-    # - missing but recoverable from a participant-specific pattern, or
-    # - obviously a year typo that now lines up after repair.
-    #
-    # I still allow a repaired year typo to end up at -1, 0, or 1 day after
-    # cleaning because those are all within the range that already shows up
-    # naturally in the better-behaved rows.
+    # Carry the main row date through the cleaned outputs.
+    cleaned_actigraphy_date = authoritative_merged_date,
+    cleaned_sleep_episode_date = authoritative_merged_date,
+
+    # Keep the existing output column name for the harmonized date.
+    cleaned_diary_report_date = authoritative_merged_date,
+
+    # Diary-to-main-date gap after the minimal diary fix.
+    cleaned_date_diff_days = as.integer(
+      diary_date_after_minimal_fix - authoritative_merged_date
+    ),
+
+    # Short label for how the row date was resolved.
+    cleaning_rule = case_when(
+      !is.na(actigraphy_date) &
+        !is.na(diary_date) &
+        date_diff_days == 0L ~ "used_actigraphy_date_raw_dates_already_matched",
+      !is.na(actigraphy_date) &
+        !is.na(diary_date) &
+        date_diff_days %in% c(-1L, 1L) ~
+        "used_actigraphy_date_to_resolve_one_day_difference",
+      !is.na(actigraphy_date) &
+        is.na(diary_date) ~ "used_actigraphy_date_because_diary_was_missing",
+      !is.na(actigraphy_date) &
+        obvious_year_typo ~ "used_actigraphy_date_to_replace_year_typo",
+      !is.na(actigraphy_date) ~ "used_actigraphy_date_but_left_pair_for_review",
+      TRUE ~ "used_best_available_non_actigraphy_date"
+    ),
+
+    # Keep rows with a small gap, a missing diary date, or a clear year typo.
     recommended_keep = case_when(
-      cleaning_rule == "kept_raw_dates" ~ TRUE,
-      cleaning_rule == "imputed_missing_diary_date_from_actigraphy" ~ TRUE,
-      cleaning_rule == "repaired_obvious_diary_year_typo" &
-        cleaned_date_diff_days %in% c(-1L, 0L, 1L) ~ TRUE,
+      !is.na(actigraphy_date) & is.na(diary_date) ~ TRUE,
+      !is.na(actigraphy_date) & date_diff_days %in% c(-1L, 0L, 1L) ~ TRUE,
+      !is.na(actigraphy_date) & obvious_year_typo ~ TRUE,
+      is.na(actigraphy_date) & !is.na(diary_date_after_minimal_fix) ~ TRUE,
       TRUE ~ FALSE
     ),
 
-    # This quality-control label is there so that, when looking at the final
-    # workbook, I can immediately tell why a row was kept and what kind of
-    # date behavior it represents.
-    #
-    # In other words, `recommended_keep` is the binary decision, and
-    # `date_qc_flag` is the explanation attached to that decision.
+    # QC label for the cleaned date decision.
     date_qc_flag = case_when(
-      cleaning_rule == "kept_raw_dates" &
-        cleaned_date_diff_days == 0L ~ "same_day_dates",
-      cleaning_rule == "kept_raw_dates" &
-        cleaned_date_diff_days == 1L ~ "diary_date_is_next_day",
-      cleaning_rule == "imputed_missing_diary_date_from_actigraphy" ~
-        "missing_diary_date_imputed",
-      cleaning_rule == "repaired_obvious_diary_year_typo" ~
-        "obvious_year_typo_repaired",
-      TRUE ~ "unresolved_date_conflict"
+      !is.na(actigraphy_date) &
+        !is.na(diary_date) &
+        date_diff_days == 0L ~ "actigraphy_used_raw_dates_matched",
+      !is.na(actigraphy_date) &
+        !is.na(diary_date) &
+        date_diff_days %in% c(-1L, 1L) ~
+        "actigraphy_used_one_day_diary_difference",
+      !is.na(actigraphy_date) &
+        is.na(diary_date) ~ "actigraphy_used_diary_date_missing",
+      !is.na(actigraphy_date) &
+        obvious_year_typo ~ "actigraphy_used_obvious_year_typo",
+      !recommended_keep ~ "actigraphy_used_but_pair_needs_review",
+      TRUE ~ "non_actigraphy_fallback_used"
     )
   ) %>%
-  # Sorting here just makes the workbook easier to read by hand.
-  # When reviewing a participant, it is much easier to scan rows in order
-  # of study day than in whatever order the merge happened to return.
+  # Sort for review.
   arrange(merge_participant_id, merge_study_day)
 
-# This is the actual analysis file: only rows that passed the conservative
-# review rules above.
+## Analysis-ready rows
+# Analysis-ready subset.
 best_cleaned_analysis_ready <- best_cleaned_merged_data %>%
   filter(recommended_keep)
 
-# These are the rows I was not comfortable forcing into the analytic set.
-# I still want them written out, because unresolved data problems are often
-# more useful when they are visible than when they disappear silently.
+## Review rows
+# Rows held for review.
 best_cleaned_review_rows <- best_cleaned_merged_data %>%
   filter(!recommended_keep)
 
-# This summary is a quick bookkeeping table.
-# It gives a compact count of how many rows were kept as-is, how many needed
-# imputation, how many were repaired as year typos, and how many still need
-# manual review.
+## Cleaning summary
+# Summary counts by cleaning rule and QC label.
 best_cleaned_summary <- best_cleaned_merged_data %>%
   count(cleaning_rule, date_qc_flag, recommended_keep, name = "n_rows") %>%
   arrange(desc(n_rows), cleaning_rule, date_qc_flag)
 
-# I write everything back into the same workbook so the raw merge,
-# the cleaned merge, and the review tabs all live together.
-# For a project like this, that tends to be much easier to manage than
-# scattering slightly different versions across multiple files.
+## Final workbook write
+# Write all outputs to one workbook.
 write_xlsx(
   list(
     merged_data = merged_data,
@@ -377,10 +398,8 @@ write_xlsx(
   output_path
 )
 
-# These last two lines are just a quick sanity check in the console.
-# They make it obvious, right after the script runs, how many matched rows
-# survived into the analysis set and how many were deliberately held back
-# for review.
+## Cleaned row counts
+# Quick row counts in the console.
 cat(
   "Best cleaned analysis-ready rows:",
   nrow(best_cleaned_analysis_ready),
