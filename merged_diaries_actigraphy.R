@@ -3,6 +3,12 @@ library(readxl)
 library(dplyr)
 library(stringr)
 library(writexl)
+source("./excel_date_time_utils.R")
+
+# Format every sheet the same way before writing to Excel.
+prepare_workbook_sheets <- function(sheet_list) {
+  lapply(sheet_list, prepare_excel_export)
+}
 
 ## File paths
 diary_path <- "./combined_data.xlsx"
@@ -19,6 +25,7 @@ if (!file.exists(actigraphy_path)) {
 }
 
 ## ID helpers
+# Turn the participant IDs into one consistent PUSH_### format.
 normalize_push_id <- function(x) {
   id_digits <- str_extract(as.character(x), "[0-9]+")
 
@@ -29,6 +36,7 @@ normalize_push_id <- function(x) {
   )
 }
 
+# Pull the day number out of labels like "Day 3".
 normalize_study_day <- function(x) {
   as.integer(str_extract(as.character(x), "[0-9]+"))
 }
@@ -139,6 +147,7 @@ check_unique_key <- function(data, key_cols, data_name) {
 
 ## Read diary data
 diary_data <- read_excel(diary_path) %>%
+  normalize_date_time_fields() %>%
   mutate(
     merge_participant_id = normalize_push_id(`Participant ID`),
     merge_study_day = normalize_study_day(`Study Day`),
@@ -147,6 +156,7 @@ diary_data <- read_excel(diary_path) %>%
 
 ## Read actigraphy data
 actigraphy_data <- read_excel(actigraphy_path) %>%
+  normalize_date_time_fields() %>%
   mutate(
     merge_participant_id = normalize_push_id(ParticipantID),
     merge_study_day = normalize_study_day(StudyDay),
@@ -223,14 +233,24 @@ diary_only_rows <- merged_data %>%
 actigraphy_only_rows <- merged_data %>%
   filter(merge_status == "actigraphy_only")
 
+## Time reconciliation review
+time_reconciliation_review_rows <- collect_time_reconciliation_review_rows(
+  merged_data
+)
+time_reconciliation_summary <- collect_time_reconciliation_summary(
+  merged_data
+)
+
 ## Initial workbook write
 write_xlsx(
-  list(
+  prepare_workbook_sheets(list(
     merged_data = merged_data,
     date_alignment_summary = date_alignment_summary,
     diary_only_rows = diary_only_rows,
-    actigraphy_only_rows = actigraphy_only_rows
-  ),
+    actigraphy_only_rows = actigraphy_only_rows,
+    time_reconciliation_review_rows = time_reconciliation_review_rows,
+    time_reconciliation_summary = time_reconciliation_summary
+  )),
   output_path
 )
 
@@ -385,16 +405,18 @@ best_cleaned_summary <- best_cleaned_merged_data %>%
 ## Final workbook write
 # Write all outputs to one workbook.
 write_xlsx(
-  list(
+  prepare_workbook_sheets(list(
     merged_data = merged_data,
     date_alignment_summary = date_alignment_summary,
     diary_only_rows = diary_only_rows,
     actigraphy_only_rows = actigraphy_only_rows,
+    time_reconciliation_review_rows = time_reconciliation_review_rows,
+    time_reconciliation_summary = time_reconciliation_summary,
     best_cleaned_merged_data = best_cleaned_merged_data,
     best_cleaned_analysis_ready = best_cleaned_analysis_ready,
     best_cleaned_review_rows = best_cleaned_review_rows,
     best_cleaned_summary = best_cleaned_summary
-  ),
+  )),
   output_path
 )
 

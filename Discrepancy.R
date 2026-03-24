@@ -1,15 +1,22 @@
-install.packages("readxl")
 library(readxl)
+source("./excel_date_time_utils.R")
 
 #Data Input ----
-kalinka <- read_excel("./Jan 2026 COPY PUSHAdolescentDailyDiary_DATA_LABELS_7.2.2024_CLEANING_JA_KALIKA_11.24.2025_updated.xlsx")
-rayaan <- read_excel("./Jan 2026 COPY PUSHAdolescentDailyDiary_DATA_LABELS_7.2.2024_CLEANING_JA_RAYAAN_12.12.2025.xlsx")
+kalinka <- suppressWarnings(
+  read_excel("./Jan 2026 COPY PUSHAdolescentDailyDiary_DATA_LABELS_7.2.2024_CLEANING_JA_KALIKA_11.24.2025_updated.xlsx")
+)
+rayaan <- suppressWarnings(
+  read_excel("./Jan 2026 COPY PUSHAdolescentDailyDiary_DATA_LABELS_7.2.2024_CLEANING_JA_RAYAAN_12.12.2025.xlsx")
+)
 kalinka[kalinka == -888] <- NA
 rayaan[rayaan == -888] <- NA
 kalinka[kalinka == -999] <- NA
 rayaan[rayaan == -999] <- NA
 kalinka[kalinka == -555] <- NA
 rayaan[rayaan == -555] <- NA
+# Put dates and clock times on the same scale before comparing files.
+kalinka <- normalize_date_time_fields(kalinka)
+rayaan <- normalize_date_time_fields(rayaan)
 
 
 
@@ -143,16 +150,10 @@ new_data <- new_data %>%
 
 View(new_data)
 
-# Fixing Dates----
-new_data$Date <- as.numeric(new_data$Date)
-new_data$Date <- as.Date(new_data$Date, origin = "1899-12-30")
-
-View(new_data)
-
 #Rounding ----
 
 library(dplyr)
-new_data <- new_data %>% mutate_if(is.numeric, round, 2)
+new_data <- round_non_datetime_numeric(new_data, digits = 2)
 View(new_data)
 
 #Merging hours and minutes ----
@@ -168,13 +169,20 @@ new_data <- new_data %>%
 View(new_data)
 
 #Online data add/first checks ----
-online <- read_excel("./FINAL ONLINE PUSHAdolescentDailyDiary_3.9.2026.xlsx")
+online <- suppressWarnings(
+  read_excel("./FINAL ONLINE PUSHAdolescentDailyDiary_3.9.2026.xlsx")
+)
+# Rename the blank online columns before normalization so the date column gets
+# handled like every other date field.
+names(online)[names(online) == "...44"] <- "online complete?"
+names(online)[names(online) == "...45"] <- "online date?"
+online <- normalize_date_time_fields(online)
 View(online)
 
 
 all.equal(new_data, online)
 
-all(names(new_data) == names(online))
+identical(names(new_data), names(online))
 intersect(names(new_data), names(online))
 
 #new_data only columns
@@ -256,7 +264,7 @@ setdiff(names(online), names(new_data))
 #Rounding
 
 library(dplyr)
-online <- online %>% mutate_if(is.numeric, round, 2)
+online <- round_non_datetime_numeric(online, digits = 2)
 
 
 #Merging hours and minutes online
@@ -278,13 +286,14 @@ setdiff(names(new_data), names(online))
 #online only columns
 setdiff(names(online), names(new_data))
 
-names(online)[names(online) == "...44"] <- "online complete?"
-names(online)[names(online) == "...45"] <- "online date?"
-
 new_data$DELETE <- NULL
 online$"Academic Year" <- NA
 new_data$"online complete?" <- NA
 new_data$"online date?" <- NA
+
+# Build cleaned time columns before stacking the diary and online files.
+new_data <- add_reconciled_time_columns(new_data)
+online <- add_reconciled_time_columns(online)
 
 #final check
 
@@ -295,13 +304,17 @@ setdiff(names(online), names(new_data))
 
 #Combined data set/pushing to git ----
 combined <- rbind(new_data, online)
+# Keep the review tabs in the same workbook as the combined data.
+time_reconciliation_review_rows <- collect_time_reconciliation_review_rows(combined)
+time_reconciliation_summary <- collect_time_reconciliation_summary(combined)
 View(combined)
 
-install.packages("writexl")
 library(writexl)
-write_xlsx(combined, "combined_data.xlsx")
-
-
-
-
-
+write_xlsx(
+  list(
+    Sheet1 = prepare_excel_export(combined),
+    time_reconciliation_review_rows = prepare_excel_export(time_reconciliation_review_rows),
+    time_reconciliation_summary = prepare_excel_export(time_reconciliation_summary)
+  ),
+  "combined_data.xlsx"
+)
