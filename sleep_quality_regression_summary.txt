@@ -1,0 +1,68 @@
+Simple regression analysis using Sleep Quality as the predictor
+Input workbook: merged_diaries_actigraphy.xlsx 
+Sheet: best_cleaned_analysis_ready 
+
+Outcome: Diary Sleep Duration (minutes) 
+Model: Unadjusted 
+Formula: `Sleep Duration` ~ `Sleep Quality` 
+N: 147 
+R-squared: 0.0098 
+Adjusted R-squared: 0.003 
+
+Coefficients:
+                Estimate Std. Error t value Pr(>|t|)    
+(Intercept)       430.05      85.26   5.044 1.34e-06 ***
+`Sleep Quality`    13.25      11.04   1.200    0.232    
+---
+Signif. codes:  0 ‘***’ 0.001 ‘**’ 0.01 ‘*’ 0.05 ‘.’ 0.1 ‘ ’ 1
+
+Outcome: Actigraphy Sleep Duration (minutes) 
+Model: Unadjusted 
+Formula: C_ACTI_Duration ~ `Sleep Quality` 
+N: 148 
+R-squared: 0.001 
+Adjusted R-squared: -0.0059 
+
+Coefficients:
+                Estimate Std. Error t value Pr(>|t|)    
+(Intercept)      466.428     30.051   15.52   <2e-16 ***
+`Sleep Quality`    1.476      3.882    0.38    0.704    
+---
+Signif. codes:  0 ‘***’ 0.001 ‘**’ 0.01 ‘*’ 0.05 ‘.’ 0.1 ‘ ’ 1
+
+Outcome: Diary Sleep Duration (minutes) 
+Model: Adjusted for weekend and summer 
+Formula: `Sleep Duration` ~ `Sleep Quality` + Weekend_Indicator + Summer_Break_Indicator 
+N: 147 
+R-squared: 0.0104 
+Adjusted R-squared: -0.0104 
+
+Coefficients:
+                       Estimate Std. Error t value Pr(>|t|)    
+(Intercept)             434.721     88.041   4.938 2.17e-06 ***
+`Sleep Quality`          13.276     11.116   1.194    0.234    
+Weekend_Indicator       -14.120     50.974  -0.277    0.782    
+Summer_Break_Indicator   -3.981     51.387  -0.077    0.938    
+---
+Signif. codes:  0 ‘***’ 0.001 ‘**’ 0.01 ‘*’ 0.05 ‘.’ 0.1 ‘ ’ 1
+
+Outcome: Actigraphy Sleep Duration (minutes) 
+Model: Adjusted for weekend and summer 
+Formula: C_ACTI_Duration ~ `Sleep Quality` + Weekend_Indicator + Summer_Break_Indicator 
+N: 148 
+R-squared: 0.0757 
+Adjusted R-squared: 0.0564 
+
+Coefficients:
+                       Estimate Std. Error t value Pr(>|t|)    
+(Intercept)             445.916     29.893  14.917  < 2e-16 ***
+`Sleep Quality`           1.471      3.761   0.391  0.69640    
+Weekend_Indicator        54.473     17.316   3.146  0.00201 ** 
+Summer_Break_Indicator   22.117     17.460   1.267  0.20729    
+---
+Signif. codes:  0 ‘***’ 0.001 ‘**’ 0.01 ‘*’ 0.05 ‘.’ 0.1 ‘ ’ 1
+
+Notes:
+- Sleep Quality is treated as a numeric 1 to 10 predictor.
+- Sleep duration outcomes are in minutes.
+- These are simple linear models and do not account for repeated days within participant.
