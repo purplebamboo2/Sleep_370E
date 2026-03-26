@@ -318,3 +318,91 @@ write_xlsx(
   ),
   "combined_data.xlsx"
 )
+
+
+#Quick analysis for class (very messy) ----
+View(combined)
+
+combined <- combined %>%
+  mutate(
+    TV_Total_Minutes = coalesce(combined$`TV Movies Hrs`,0)*60 + coalesce(combined$`TV Movies Mins`,0),
+    Videos_Total_Minutes = coalesce(combined$`Watch Videos Hrs`,0)*60 + coalesce(combined$`Watch Videos Mins`,0),
+    VideoGames_Total_Minutes = coalesce(combined$`Video Games Hrs`,0)*60 + coalesce(combined$`Video Games Mins`,0),
+    VideoChat_Total_Minutes = coalesce(combined$`Video Chat Hrs`,0)*60 + coalesce(combined$`Video Chat Mins`,0),
+    Devices_Total_Minutes = coalesce(combined$`Devices Hrs`,0)*60 + coalesce(combined$`Devices Mins`,0),
+    SocialMedia_Total_Minutes = coalesce(combined$`Social Media Hrs`,0)*60 + coalesce(combined$`Social Media Mins`,0)
+  )
+View(combined)
+
+
+ggplot(data = combined, aes(x = `Sleep Duration`, y = `Sleep Quality`)) +
+  geom_point(color = "blue") +          
+  geom_smooth(method = "lm", col = "red") + 
+  labs(title = "Sleep Quality v Sleep Duration",
+       x = "Sleep (minutes)",
+       y = "Sleep Quality (1-10)") +
+  theme_minimal()   
+ggplot(data = combined, aes(x = `Physical Activity Mins`, y = `Sleep Quality`)) +
+  geom_point(color = "blue") +          
+  geom_smooth(method = "lm", col = "red") + 
+  labs(title = "Sleep Quality v Physical Activity",
+       x = "Physical Activity (minutes)",
+       y = "Sleep Quality (1-10)") +
+  theme_minimal()   
+ggplot(data = combined, aes(x = `Sleep Quality`, y = `Anxiety Rating`)) +
+  geom_point(color = "blue") +          
+  geom_smooth(method = "lm", col = "red") + 
+  labs(title = "Sleep Quality v Anxiety Rating",
+       x = "Anxiety Rating",
+       y = "Sleep Quality (1-10)") +
+  theme_minimal()   
+ggplot(data = combined, aes(x = Devices_Total_Minutes, y = `Sleep Quality`)) +
+  geom_point(color = "blue") +          
+  geom_smooth(method = "lm", col = "red") + 
+  labs(title = "Sleep Quality v Device Minutes",
+       x = "Device (minutes)",
+       y = "Sleep Quality (1-10)") +
+  theme_minimal()
+ggplot(data = combined, aes(x = SocialMedia_Total_Minutes, y = `Sleep Quality`)) +
+  geom_point(color = "blue") +          
+  geom_smooth(method = "lm", col = "red") + 
+  labs(title = "Sleep Quality v Social Media ",
+       x = "Social Media (minutes)",
+       y = "Sleep Quality (1-10)") +
+  theme_minimal()   
+ggplot(data = combined, aes(x = `Sleep Quality`, y = `Alertness Rating`)) +
+  geom_point(color = "blue") +          
+  geom_smooth(method = "lm", col = "red") + 
+  labs(title = "Sleep Quality v Alertness",
+       x = "Sleep Quality (1-10)",
+       y = "Alertness Rating") +
+  theme_minimal()   
+
+model <- lm(combined$`Sleep Quality` ~ combined$`Sleep Duration`, data = combined)
+summary(model)
+model1 <- lm(combined$`Sleep Quality` ~ combined$`Anxiety Rating`, data = combined)
+summary(model1)
+model2 <- lm(combined$`Sleep Quality` ~ combined$`Alertness Rating`, data = combined)
+summary(model2)
+model3 <- lm(combined$`Sleep Quality` ~ combined$SocialMedia_Total_Minutes, data = combined)
+summary(model3)
+model4 <- lm(combined$`Sleep Quality` ~ combined$Devices_Total_Minutes, data = combined)
+summary(model4)
+model5 <- lm(combined$`Sleep Quality` ~ combined$`Physical Activity Mins`, data = combined)
+summary(model5)
+model6 <- lm(combined$`Alertness Rating` ~ combined$`Anxiety Rating`, data = combined)
+summary(model6)
+mean(combined$`Sleep Duration`)
+ggplot(data = combined, aes(x = `Anxiety Rating`, y = `Alertness Rating`)) +
+  geom_point(color = "blue") +          
+  geom_smooth(method = "lm", col = "red") + 
+  labs(title = "Sleep Quality v Alertness",
+       x = "Sleep Quality (1-10)",
+       y = "Alertness Rating") +
+  theme_minimal() 
+
+mean(combined$Devices_Total_Minutes[combined$Devices_Total_Minutes != 0], na.rm = TRUE)
+mean(combined$SocialMedia_Total_Minutes[combined$Devices_Total_Minutes != 0], na.rm = TRUE)
+
+summary(combined$Devices_Total_Minutes)
+summary(combined$SocialMedia_Total_Minutes)
