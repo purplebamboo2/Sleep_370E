@@ -54,3 +54,54 @@ model_alertness <- lm(step1$`Alertness Rating` ~ step1$`Sleep Duration` +
                                                  step1$`Sleep Onset Decimal Hour`, data = step1)
 summary(model_alertness)
 
+
+
+#Wake Difficulty----
+
+wake_onset <- lm(mean_wake_diff ~ onset_var, data = sleep_var)
+summary(wake_onset)
+wake_offset <- lm(mean_wake_diff ~ offset_var, data = sleep_var)
+summary(wake_offset)
+
+
+wake_onset_offset <- lm(step1$`Wake Difficulty Rating` ~ step1$`Sleep Offset Time_Decimal Hour` + 
+                           step1$`Sleep Onset Decimal Hour` ,data = step1)
+summary(wake_onset_offset)
+
+model_wake <- lm(step1$`Wake Difficulty Rating` ~ step1$`Sleep Duration` + 
+                        step1$`Sleep Offset Time_Decimal Hour` + 
+                        step1$`Sleep Onset Decimal Hour`, data = step1)
+summary(model_wake)
+
+#Anxiety----
+
+anxiety_onset <- lm(mean_anxiety ~ onset_var, data = sleep_var)
+summary(anxiety_onset)
+anxiety_offset <- lm(mean_anxiety ~ offset_var, data = sleep_var)
+summary(anxiety_offset)
+
+
+anxiety_onset_offset <- lm(step1$`Anxiety Rating` ~ step1$`Sleep Offset Time_Decimal Hour` + 
+                           step1$`Sleep Onset Decimal Hour` ,data = step1)
+summary(anxiety_onset_offset)
+
+model_anxiety <- lm(step1$`Anxiety Rating` ~ step1$`Sleep Duration` + 
+                        step1$`Sleep Offset Time_Decimal Hour` + 
+                        step1$`Sleep Onset Decimal Hour`, data = step1)
+summary(model_anxiety)
+#Sleep Quality----
+
+sleep_onset <- lm(mean_sleep_quality ~ onset_var, data = sleep_var)
+summary(sleep_onset)
+sleep_offset <- lm(mean_sleep_quality ~ offset_var, data = sleep_var)
+summary(sleep_offset)
+
+
+sleep_onset_offset <- lm(step1$`Sleep Quality` ~ step1$`Sleep Offset Time_Decimal Hour` + 
+                           step1$`Sleep Onset Decimal Hour` ,data = step1)
+summary(sleep_onset_offset)
+
+model_sleep <- lm(step1$`Sleep Quality` ~ step1$`Sleep Duration` + 
+                        step1$`Sleep Offset Time_Decimal Hour` + 
+                        step1$`Sleep Onset Decimal Hour`, data = step1)
+summary(model_sleep)
