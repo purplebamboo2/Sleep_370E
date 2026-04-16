@@ -3,7 +3,7 @@ source("./excel_date_time_utils.R")
 
 
 #Data Input ----
-step1 <- suppressWarnings(read_excel("./merged_diaries_actigraphy.xlsx"))
+step1 <- suppressWarnings(read_excel("./merged_diaries_actigraphy.xlsx", sheet = "best_cleaned_analysis_ready"))
 View(step1)
 step1$`Sleep Onset Decimal Hour` <- as.numeric(step1$`Sleep Onset Decimal Hour`)
 step1$`Sleep Offset Time_Decimal Hour` <- as.numeric(step1$`Sleep Offset Time_Decimal Hour`)
