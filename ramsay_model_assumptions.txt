@@ -1,0 +1,31 @@
+
+Basic Assumptions
+=================
+I only checked the basics here: residual shape, obvious outliers, residual spread, and random intercept behavior.
+
+Primary Mixed Model
+===================
+Residuals are a little left-skewed (Shapiro p = 0.0000, skew = -0.88), with 3 residuals beyond |3|.
+Residual spread looks acceptable overall: cor(|residual|, fitted) = -0.23.
+Random intercepts look acceptable for a first pass (Shapiro p = 0.267).
+Verdict: good enough for the planned first-pass mixed-model analysis.
+
+Exploratory Mixed Model
+=======================
+Residuals show the same basic pattern (Shapiro p = 0.0001, skew = -0.86), with 1 residuals beyond |3|.
+Residual spread still looks acceptable: cor(|residual|, fitted) = -0.17.
+Random intercepts still look acceptable (Shapiro p = 0.284).
+Verdict: also usable, with the same mild non-normality caveat.
+
+Overall Call
+============
+The mixed models look acceptable for a first-pass write-up.
+The biggest issue is mild residual non-normality, which is not surprising for a 1-10 outcome.
+I do not see a big variance problem, and the random intercepts look reasonable.
+So my call is: the main assumptions are met well enough to proceed.
+
+Files
+=====
+Mixed results: ramsay_mixed_model_results.txt 
+Assumption report: ramsay_model_assumptions.txt 
+Diagnostic plots: ramsay_primary_model_diagnostics.png and ramsay_exploratory_model_diagnostics.png 

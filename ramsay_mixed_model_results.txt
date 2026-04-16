@@ -1,0 +1,152 @@
+
+Mixed-Effects Sleep Quality Analysis
+====================================
+Data file: merged_diaries_actigraphy.xlsx 
+Worksheet: best_cleaned_analysis_ready 
+
+Sample Sizes
+============
+              model nights participants median_nights_per_participant
+1        Null model    148           27                             6
+2     Primary model    147           27                             6
+3 Exploratory model    138           27                             6
+
+Null Model
+==========
+Linear mixed-effects model fit by REML
+  Data: null_data 
+       AIC      BIC    logLik
+  633.9816 642.9529 -313.9908
+
+Random effects:
+ Formula: ~1 | id
+        (Intercept) Residual
+StdDev:   0.7383152 1.912701
+
+Fixed effects:  sleep_quality ~ 1 
+               Value Std.Error  DF  t-value p-value
+(Intercept) 7.485555 0.2155876 121 34.72165       0
+
+Standardized Within-Group Residuals:
+       Min         Q1        Med         Q3        Max 
+-3.1594382 -0.5431632  0.1214420  0.6654768  1.5967269 
+
+Number of Observations: 148
+Number of Groups: 27 
+ICC: 0.13 
+
+Primary Model
+=============
+Linear mixed-effects model fit by REML
+  Data: primary_data 
+       AIC      BIC    logLik
+  646.7605 673.2353 -314.3803
+
+Random effects:
+ Formula: ~1 | id
+        (Intercept) Residual
+StdDev:    0.865899 1.890995
+
+Fixed effects:  sleep_quality ~ duration_within + duration_mean + onset_within +      onset_mean + weekend + summer 
+                    Value Std.Error  DF   t-value p-value
+(Intercept)      7.266408 0.6405225 116 11.344500  0.0000
+duration_within  0.087234 0.0693914 116  1.257133  0.2112
+duration_mean    0.024891 0.0601682  24  0.413692  0.6828
+onset_within    -0.145911 0.1455308 116 -1.002612  0.3181
+onset_mean       0.046566 0.2313890  24  0.201244  0.8422
+weekend          0.160338 0.3684467 116  0.435173  0.6642
+summer          -0.096495 0.5546065 116 -0.173989  0.8622
+ Correlation: 
+                (Intr) drtn_w drtn_m onst_w onst_m weeknd
+duration_within  0.006                                   
+duration_mean   -0.824  0.000                            
+onset_within     0.047  0.195 -0.005                     
+onset_mean       0.356  0.004 -0.013  0.007              
+weekend         -0.168 -0.015  0.021 -0.204  0.035       
+summer          -0.334 -0.011  0.013 -0.033 -0.381 -0.020
+
+Standardized Within-Group Residuals:
+       Min         Q1        Med         Q3        Max 
+-3.1293481 -0.4769594  0.1155246  0.7106125  1.7892021 
+
+Number of Observations: 147
+Number of Groups: 27 
+Approximate 95% confidence intervals
+
+ Fixed effects:
+                      lower        est.     upper
+(Intercept)      5.99777199  7.26640750 8.5350430
+duration_within -0.05020416  0.08723416 0.2246725
+duration_mean   -0.09929002  0.02489109 0.1490722
+onset_within    -0.43415292 -0.14591086 0.1423312
+onset_mean      -0.43099788  0.04656564 0.5241292
+weekend         -0.56941710  0.16033795 0.8900930
+summer          -1.19496347 -0.09649544 1.0019726
+
+Exploratory Model
+=================
+Linear mixed-effects model fit by REML
+  Data: exploratory_data 
+       AIC      BIC    logLik
+  615.6364 647.0944 -296.8182
+
+Random effects:
+ Formula: ~1 | id
+        (Intercept) Residual
+StdDev:   0.8729657 1.896303
+
+Fixed effects:  sleep_quality ~ duration_within + duration_mean + onset_within +      onset_mean + weekend + summer + pa_hr + device_hr 
+                    Value Std.Error  DF   t-value p-value
+(Intercept)      7.717532 0.7364673 105 10.479123  0.0000
+duration_within  0.066997 0.0724439 105  0.924815  0.3572
+duration_mean    0.027094 0.0630133  24  0.429973  0.6711
+onset_within    -0.150964 0.1477784 105 -1.021557  0.3093
+onset_mean      -0.054978 0.2504964  24 -0.219478  0.8281
+weekend          0.139119 0.3792880 105  0.366791  0.7145
+summer          -0.035630 0.5975405 105 -0.059627  0.9526
+pa_hr           -0.258082 0.1232282 105 -2.094343  0.0386
+device_hr       -0.190760 0.1402243 105 -1.360389  0.1766
+ Correlation: 
+                (Intr) drtn_w drtn_m onst_w onst_m weeknd summer pa_hr 
+duration_within -0.046                                                 
+duration_mean   -0.795  0.011                                          
+onset_within     0.010  0.211  0.006                                   
+onset_mean       0.209  0.031  0.036  0.013                            
+weekend         -0.152  0.035  0.009 -0.181  0.044                     
+summer          -0.329 -0.008  0.009 -0.009 -0.402 -0.051              
+pa_hr           -0.209  0.103  0.033 -0.002  0.192  0.111 -0.084       
+device_hr       -0.384  0.069  0.127  0.067  0.127 -0.045  0.151  0.079
+
+Standardized Within-Group Residuals:
+       Min         Q1        Med         Q3        Max 
+-3.1037655 -0.4743539  0.1083470  0.6703128  1.8450378 
+
+Number of Observations: 138
+Number of Groups: 27 
+Approximate 95% confidence intervals
+
+ Fixed effects:
+                      lower        est.       upper
+(Intercept)      6.25725303  7.71753168  9.17781033
+duration_within -0.07664571  0.06699723  0.21064017
+duration_mean   -0.10295907  0.02709400  0.15714708
+onset_within    -0.44398131 -0.15096402  0.14205327
+onset_mean      -0.57197762 -0.05497846  0.46202071
+weekend         -0.61293861  0.13911942  0.89117746
+summer          -1.22044217 -0.03562978  1.14918262
+pa_hr           -0.50242098 -0.25808217 -0.01374336
+device_hr       -0.46879831 -0.19075951  0.08727929
+
+Interpretation Notes
+====================
+Within-person duration effect: 0.09 points in Sleep Quality for each extra hour above a participant's own average duration.
+Between-person duration effect: 0.02 points in Sleep Quality for each extra hour in a participant's average duration.
+Within-person onset effect: -0.15 points in Sleep Quality for each one-hour later sleep onset than usual.
+Between-person onset effect: 0.05 points in Sleep Quality for each one-hour later average sleep onset.
+Exploratory activity effect: -0.26 points per extra hour of physical activity.
+Exploratory device effect: -0.19 points per extra hour of device time.
+
+Assumptions
+===========
+Basic assumption checks are all at the very end of this script.
+Assumption report: ramsay_model_assumptions.txt 
