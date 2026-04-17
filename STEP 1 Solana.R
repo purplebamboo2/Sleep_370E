@@ -275,3 +275,42 @@ ggplot(sleep_var,
   geom_point(size = 2) +
   geom_smooth(method = "lm") +
   theme_minimal()
+
+#Pearson Correlation on DV----
+install.packages("Hmisc")
+install.packages("corrplot")
+install.packages("GGally")
+library(Hmisc)
+library(corrplot)
+library(GGally)
+
+#dependent variables
+dep_vars <- step1[, c(
+  "Alertness Rating",
+  "Wake Difficulty Rating",
+  "Anxiety Rating",
+  "Sleep Quality"
+)]
+
+#Pearson correlation matrix
+cor_matrix <- cor(dep_vars,
+                  use = "pairwise.complete.obs",
+                  method = "pearson")
+
+print(cor_matrix)
+
+#Correlations WITH p-values
+cor_test_results <- rcorr(as.matrix(dep_vars),
+                          type = "pearson")
+
+print(cor_test_results)
+
+#Correlation plot
+corrplot(cor_matrix,
+         method = "circle",
+         type = "upper",
+         tl.col = "black",
+         tl.cex = 0.9)
+
+#Scatterplot matrix with regression lines
+ggpairs(dep_vars)
