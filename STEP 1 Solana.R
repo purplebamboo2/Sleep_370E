@@ -1,8 +1,9 @@
-library(readxl)
-source("./excel_date_time_utils.R")
 
 
 #Data Input ----
+library(readxl)
+source("./excel_date_time_utils.R")
+
 step1 <- suppressWarnings(read_excel("./merged_diaries_actigraphy.xlsx", sheet = "best_cleaned_analysis_ready"))
 View(step1)
 step1$`Sleep Onset Decimal Hour` <- as.numeric(step1$`Sleep Onset Decimal Hour`)
@@ -22,110 +23,25 @@ library(openxlsx)
 write.xlsx(means, "mean_per_person.xlsx")
 
 
-#Standard Deviations----
 
+#All together vers----
 
-library(dplyr)
+#Building blocks----
 
-sleep_var <- step1 %>%
-  group_by(`Global Participant ID`) %>%
-  summarise(
-    onset_var = sd(`Sleep Onset Decimal Hour`, na.rm = TRUE),
-    offset_var = sd(`Sleep Offset Time_Decimal Hour`, na.rm = TRUE),
-    mean_alertness = mean(`Alertness Rating`, na.rm = TRUE),
-    mean_wake_diff = mean(`Wake Difficulty Rating`, na.rm = TRUE),
-    mean_anxiety = mean(`Anxiety Rating`, na.rm = TRUE),
-    mean_sleep_quality = mean(`Sleep Quality`, na.rm = TRUE)
-  )
-step1 <- merge(step1, sleep_var, by = "Global Participant ID")
-#Alertness Analysis----
-
-alert_onset <- lm(mean_alertness ~ onset_var, data = sleep_var)
-summary(alert_onset)
-alert_offset <- lm(mean_alertness ~ offset_var, data = sleep_var)
-summary(alert_offset)
-
-
-alert_onset_offset <- lm(step1$`Alertness Rating` ~ step1$`Sleep Offset Time_Decimal Hour` + 
-                                         step1$`Sleep Onset Decimal Hour` ,data = step1)
-summary(alert_onset_offset)
-
-model_alertness <- lm(step1$`Alertness Rating` ~ step1$`Sleep Duration` + 
-                                                 step1$`Sleep Offset Time_Decimal Hour` + 
-                                                 step1$`Sleep Onset Decimal Hour`, data = step1)
-summary(model_alertness)
-
-
-
-#Wake Difficulty----
-
-wake_onset <- lm(mean_wake_diff ~ onset_var, data = sleep_var)
-summary(wake_onset)
-wake_offset <- lm(mean_wake_diff ~ offset_var, data = sleep_var)
-summary(wake_offset)
-
-
-wake_onset_offset <- lm(step1$`Wake Difficulty Rating` ~ step1$`Sleep Offset Time_Decimal Hour` + 
-                           step1$`Sleep Onset Decimal Hour` ,data = step1)
-summary(wake_onset_offset)
-
-model_wake <- lm(step1$`Wake Difficulty Rating` ~ step1$`Sleep Duration` + 
-                        step1$`Sleep Offset Time_Decimal Hour` + 
-                        step1$`Sleep Onset Decimal Hour`, data = step1)
-summary(model_wake)
-
-#Anxiety----
-
-anxiety_onset <- lm(mean_anxiety ~ onset_var, data = sleep_var)
-summary(anxiety_onset)
-anxiety_offset <- lm(mean_anxiety ~ offset_var, data = sleep_var)
-summary(anxiety_offset)
-
-
-anxiety_onset_offset <- lm(step1$`Anxiety Rating` ~ step1$`Sleep Offset Time_Decimal Hour` + 
-                           step1$`Sleep Onset Decimal Hour` ,data = step1)
-summary(anxiety_onset_offset)
-
-model_anxiety <- lm(step1$`Anxiety Rating` ~ step1$`Sleep Duration` + 
-                        step1$`Sleep Offset Time_Decimal Hour` + 
-                        step1$`Sleep Onset Decimal Hour`, data = step1)
-summary(model_anxiety)
-#Sleep Quality----
-
-sleep_onset <- lm(mean_sleep_quality ~ onset_var, data = sleep_var)
-summary(sleep_onset)
-sleep_offset <- lm(mean_sleep_quality ~ offset_var, data = sleep_var)
-summary(sleep_offset)
-
-
-sleep_onset_offset <- lm(step1$`Sleep Quality` ~ step1$`Sleep Offset Time_Decimal Hour` + 
-                           step1$`Sleep Onset Decimal Hour` ,data = step1)
-summary(sleep_onset_offset)
-
-model_sleep <- lm(step1$`Sleep Quality` ~ step1$`Sleep Duration` + 
-                        step1$`Sleep Offset Time_Decimal Hour` + 
-                        step1$`Sleep Onset Decimal Hour`, data = step1)
-summary(model_sleep)
-
-
-
-#Redo
-
-# INSTALL PACKAGES (run once)
 
 install.packages("dplyr")
 install.packages("ggplot2")
 install.packages("car")
 install.packages("corrplot")
-
-# LOAD LIBRARIES
-
+install.packages("lmtest")
 library(dplyr)
 library(ggplot2)
 library(car)
 library(corrplot)
+library(dplyr)
+library(lmtest)
 
-# STEP 1: CREATE VARIABILITY DATASET
+#Variability Dataset
 
 sleep_var <- step1 %>%
   group_by(`Global Participant ID`) %>%
@@ -138,14 +54,37 @@ sleep_var <- step1 %>%
     mean_sleep_quality = mean(`Sleep Quality`, na.rm = TRUE)
   )
 
-# STEP 2: MERGE VARIABILITY BACK INTO DATA
-
 step1 <- merge(step1, sleep_var,
                by = "Global Participant ID")
 
-# STEP 3: ALERTNESS MODEL
+#Alertness Analysis----
 
-model_alertness <- lm(
+#onset & offset
+alertness1 <- lm(
+  `Alertness Rating` ~
+    `Sleep Offset Time_Decimal Hour` +
+    `Sleep Onset Decimal Hour`,
+  data = step1
+)
+
+summary(alertness1)
+bptest(alertness1)
+
+#onset, offset, duration
+alertness2 <- lm(
+  `Alertness Rating` ~
+    `Sleep Duration` +
+    `Sleep Offset Time_Decimal Hour` +
+    `Sleep Onset Decimal Hour`,
+  data = step1
+)
+
+summary(alertness2)
+bptest(alertness2)
+
+
+#onset, offset, duration, variability
+alertness3 <- lm(
   `Alertness Rating` ~
     `Sleep Duration` +
     `Sleep Offset Time_Decimal Hour` +
@@ -155,11 +94,38 @@ model_alertness <- lm(
   data = step1
 )
 
-summary(model_alertness)
+summary(alertness3)
+bptest(alertness3)
 
-# STEP 4: WAKE DIFFICULTY MODEL
 
-model_wake <- lm(
+#Wake Difficulty Analysis----
+
+#onset & offset
+wake_diff1 <- lm(
+  `Wake Difficulty Rating` ~
+    `Sleep Offset Time_Decimal Hour` +
+    `Sleep Onset Decimal Hour`,
+  data = step1
+)
+
+summary(wake_diff1)
+bptest(wake_diff1)
+
+#onset, offset, duration
+wake_diff2 <- lm(
+  `Wake Difficulty Rating` ~
+    `Sleep Duration` +
+    `Sleep Offset Time_Decimal Hour` +
+    `Sleep Onset Decimal Hour`,
+  data = step1
+)
+
+summary(wake_diff2)
+bptest(wake_diff2)
+
+
+#onset, offset, duration, variability
+wake_diff3 <- lm(
   `Wake Difficulty Rating` ~
     `Sleep Duration` +
     `Sleep Offset Time_Decimal Hour` +
@@ -169,11 +135,36 @@ model_wake <- lm(
   data = step1
 )
 
-summary(model_wake)
+summary(wake_diff3)
+bptest(wake_diff3)
+#Anxiety Analysis----
 
-# STEP 5: ANXIETY MODEL
+#onset & offset
+anxiety1 <- lm(
+  `Anxiety Rating` ~
+    `Sleep Offset Time_Decimal Hour` +
+    `Sleep Onset Decimal Hour`,
+  data = step1
+)
 
-model_anxiety <- lm(
+summary(anxiety1)
+bptest(anxiety1)
+
+#onset, offset, duration
+anxiety2 <- lm(
+  `Anxiety Rating` ~
+    `Sleep Duration` +
+    `Sleep Offset Time_Decimal Hour` +
+    `Sleep Onset Decimal Hour`,
+  data = step1
+)
+
+summary(anxiety2)
+bptest(anxiety2)
+
+
+#onset, offset, duration, variability
+anxiety3 <- lm(
   `Anxiety Rating` ~
     `Sleep Duration` +
     `Sleep Offset Time_Decimal Hour` +
@@ -183,11 +174,36 @@ model_anxiety <- lm(
   data = step1
 )
 
-summary(model_anxiety)
+summary(anxiety3)
+bptest(anxiety3)
+#Sleep Quality Analysis----
 
-# STEP 6: SLEEP QUALITY MODEL
+#onset & offset
+sleep_quality1 <- lm(
+  `Sleep Quality` ~
+    `Sleep Offset Time_Decimal Hour` +
+    `Sleep Onset Decimal Hour`,
+  data = step1
+)
 
-model_sleep <- lm(
+summary(sleep_quality1)
+bptest(sleep_quality1)
+
+#onset, offset, duration
+sleep_quality2 <- lm(
+  `Sleep Quality` ~
+    `Sleep Duration` +
+    `Sleep Offset Time_Decimal Hour` +
+    `Sleep Onset Decimal Hour`,
+  data = step1
+)
+
+summary(sleep_quality2)
+bptest(sleep_quality2)
+
+
+#onset, offset, duration, variability
+sleep_quality3 <- lm(
   `Sleep Quality` ~
     `Sleep Duration` +
     `Sleep Offset Time_Decimal Hour` +
@@ -197,17 +213,22 @@ model_sleep <- lm(
   data = step1
 )
 
-summary(model_sleep)
+summary(sleep_quality3)
+bptest(sleep_quality3)
 
-# STEP 7: CHECK MULTICOLLINEARITY
+
+
+#plots----
+
+#CHECK MULTICOLLINEARITY
 
 vif(model_alertness)
 
-# STEP 8: REGRESSION DIAGNOSTIC PLOTS
+#REGRESSION DIAGNOSTIC PLOTS
 
 plot(model_alertness)
 
-# STEP 9: CORRELATION MATRIX
+#CORRELATION MATRIX
 
 vars <- step1 %>%
   select(
@@ -223,7 +244,7 @@ vars <- step1 %>%
 corrplot(cor(vars, use = "pairwise.complete.obs"),
          method = "circle")
 
-# STEP 10: SCATTERPLOTS WITH REGRESSION LINES
+#SCATTERPLOTS WITH REGRESSION LINES
 
 ggplot(step1,
        aes(x = `Sleep Onset Decimal Hour`,
@@ -239,7 +260,7 @@ ggplot(step1,
   geom_smooth(method = "lm") +
   theme_minimal()
 
-# STEP 11: VARIABILITY EFFECTS VISUALIZATION
+#VARIABILITY EFFECTS VISUALIZATION
 
 ggplot(sleep_var,
        aes(x = onset_var,
@@ -254,4 +275,3 @@ ggplot(sleep_var,
   geom_point(size = 2) +
   geom_smooth(method = "lm") +
   theme_minimal()
-
