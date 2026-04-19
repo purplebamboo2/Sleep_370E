@@ -314,3 +314,16 @@ corrplot(cor_matrix,
 
 #Scatterplot matrix with regression lines
 ggpairs(dep_vars)
+
+
+#running robust standard errors
+library(sandwich)
+library(lmtest)
+
+coeftest(alertness3, vcov = vcovHC(alertness3, type = "HC3"))
+coeftest(wake_diff3, vcov = vcovHC(wake_diff3, type = "HC3"))
+coeftest(sleep_quality3, vcov = vcovHC(sleep_quality3, type = "HC3"))
+
+
+
+
