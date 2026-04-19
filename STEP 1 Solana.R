@@ -316,14 +316,127 @@ corrplot(cor_matrix,
 ggpairs(dep_vars)
 
 
-#running robust standard errors
+#running robust standard errors----
 library(sandwich)
 library(lmtest)
 
 coeftest(alertness3, vcov = vcovHC(alertness3, type = "HC3"))
+coeftest(anxiety3, vcov = vcovHC(anxiety3, type = "HC3"))
 coeftest(wake_diff3, vcov = vcovHC(wake_diff3, type = "HC3"))
 coeftest(sleep_quality3, vcov = vcovHC(sleep_quality3, type = "HC3"))
 
 
 
 
+
+
+
+# graphs for the final presentation----
+
+install.packages("ggplot2")
+install.packages("corrplot")
+install.packages("broom")
+install.packages("dplyr")
+
+library(ggplot2)
+library(corrplot)
+library(broom)
+library(dplyr)
+
+# GRAPH 1: Sleep Duration → Alertness
+
+ggplot(step1,
+       aes(x = `Sleep Duration`,
+           y = `Alertness Rating`)) +
+  geom_point(alpha = .5) +
+  geom_smooth(method = "lm", se = TRUE) +
+  theme_minimal() +
+  labs(title = "Sleep Duration Predicting Alertness",
+       x = "Sleep Duration",
+       y = "Alertness Rating")
+
+
+# GRAPH 2: Offset Variability → Wake Difficulty
+
+ggplot(step1,
+       aes(x = offset_var,
+           y = `Wake Difficulty Rating`)) +
+  geom_point(alpha = .5) +
+  geom_smooth(method = "lm", se = TRUE) +
+  theme_minimal() +
+  labs(title = "Wake-Time Variability Predicting Wake Difficulty",
+       x = "Wake-Time Variability",
+       y = "Wake Difficulty Rating")
+
+
+# GRAPH 3: Duration → Anxiety
+
+ggplot(step1,
+       aes(x = `Sleep Duration`,
+           y = `Anxiety Rating`)) +
+  geom_point(alpha = .5) +
+  geom_smooth(method = "lm", se = TRUE) +
+  theme_minimal() +
+  labs(title = "Sleep Duration Predicting Anxiety",
+       x = "Sleep Duration",
+       y = "Anxiety Rating")
+
+
+# GRAPH 4: Offset Variability → Anxiety
+
+ggplot(step1,
+       aes(x = offset_var,
+           y = `Anxiety Rating`)) +
+  geom_point(alpha = .5) +
+  geom_smooth(method = "lm", se = TRUE) +
+  theme_minimal() +
+  labs(title = "Wake-Time Variability Predicting Anxiety",
+       x = "Wake-Time Variability",
+       y = "Anxiety Rating")
+
+
+# GRAPH 5: Duration → Sleep Quality
+
+ggplot(step1,
+       aes(x = `Sleep Duration`,
+           y = `Sleep Quality`)) +
+  geom_point(alpha = .5) +
+  geom_smooth(method = "lm", se = TRUE) +
+  theme_minimal() +
+  labs(title = "Sleep Duration Predicting Sleep Quality",
+       x = "Sleep Duration",
+       y = "Sleep Quality")
+
+
+# GRAPH 6: Offset Time → Sleep Quality
+
+ggplot(step1,
+       aes(x = `Sleep Offset Time_Decimal Hour`,
+           y = `Sleep Quality`)) +
+  geom_point(alpha = .5) +
+  geom_smooth(method = "lm", se = TRUE) +
+  theme_minimal() +
+  labs(title = "Wake Time Predicting Sleep Quality",
+       x = "Sleep Offset (Decimal Hour)",
+       y = "Sleep Quality")
+
+
+# GRAPH 7: CORRELATION HEATMAP (DEPENDENT VARIABLES)
+
+library(Hmisc)
+
+dep_vars <- step1[, c(
+  "Alertness Rating",
+  "Wake Difficulty Rating",
+  "Anxiety Rating",
+  "Sleep Quality"
+)]
+
+cor_results <- rcorr(as.matrix(dep_vars))
+
+corrplot(cor_results$r,
+         p.mat = cor_results$P,
+         sig.level = 0.05,
+         insig = "blank",
+         method = "circle",
+         type = "upper")
