@@ -23,17 +23,17 @@ engine: knitr
 
 #### Step by Step Explanation (add if wanted):
 
--   **Set up** (*add if wanted*)
+**Set up** (*add if wanted*)
 
 ## 3. Results
 
--   **Descriptive Results**
+**Descriptive Results**
 
-    -   Through our upper quartile study on sleep quality we discovered that the top-quartile sleepers had a much longer sleep duration as well as lower caffeine use and less device time compared to sleepers who were not in the top-quartile. Unexpectedly, top sleepers also had higher anxiety ratings, more social media use, and less physical activity.
+Through our upper quartile study on sleep quality we discovered that the top-quartile sleepers had a much longer sleep duration as well as lower caffeine use and less device time compared to sleepers who were not in the top-quartile. Unexpectedly, top sleepers also had higher anxiety ratings, more social media use, and less physical activity.
 
--   **Regression Results**
+**Regression Results**
 
-    -   The regression study was based on the independent variables: onset time, offset time, onset variability, offset variability, sleep duration and the dependent variables: alertness, anxiety, wake difficulty, and sleep quality. Due to the recurring problem of heteroscedasticity violating the assumption of homoscedasticity in the linear regression analyses conducted for each dependent variable we used an HC3 heteroskedasticity-robust standard errors test to interpret coefficients more accurately. The results showed that sleep duration is a significant predictor for alertness (*p= 0.0096, β= 0.0023*), indicating that longer sleep duration is associated with higher alertness.
+The regression study was based on the independent variables: onset time, offset time, onset variability, offset variability, sleep duration and the dependent variables: alertness, anxiety, wake difficulty, and sleep quality. Due to the recurring problem of heteroscedasticity violating the assumption of homoscedasticity in the linear regression analyses conducted for each dependent variable we used an HC3 heteroskedasticity-robust standard errors test to interpret coefficients more accurately. The results showed that sleep duration is a significant predictor for alertness (*p= 0.0096, β= 0.0023*), indicating that longer sleep duration is associated with higher alertness.
 
 ```{r alertness-duration-plot, echo=FALSE, message=FALSE, warning=FALSE}
 library(readxl)
@@ -63,11 +63,7 @@ ggplot(plot_alertness,
   )
 ```
 
-
-
-
-
-    -   Another notable result is offset variability as a significant predictor for wake difficulty (*p=0.006, β= -0.720*), indicating that a greater inconsistency in wake time is associated with decreased difficulty.
+Another notable result is offset variability as a significant predictor for wake difficulty (*p=0.006, β= -0.720*), indicating that a greater inconsistency in wake time is associated with decreased difficulty.
 
 ```{r wake-offset-variability-plot, echo=FALSE, message=FALSE, warning=FALSE}
 library(readxl)
@@ -107,9 +103,9 @@ ggplot(plot_wake_offset,
   )
 ```
 
--   **Correlation Results**
+**Correlation Results**
 
-    -   We also looked into correlation between the dependent variables and found significant correlations between alertness & wake difficulty (r=0.42), alertness & sleep quality (*r=0.31*), and anxiety & sleep quality (*r=0.30*).
+We also looked into correlation between the dependent variables and found significant correlations between alertness & wake difficulty (r=0.42), alertness & sleep quality (*r=0.31*), and anxiety & sleep quality (*r=0.30*).
 ```{r correlation-heatmap, echo=FALSE, message=FALSE, warning=FALSE}
 library(readxl)
 library(dplyr)
@@ -148,13 +144,13 @@ corrplot(
   insig = "blank"
 )
 ```
--   **Mixed Effects Results**
+**Mixed Effects Results**
 
-    -   The data included 147 nights from 27 participants, within the data we noticed some trends although not statistically significance still peaked our interest. The trends we found were the association of more sleep than usual to a better reported sleep quality as well as a later sleep onset associated with a worse reported sleep quality. Though these are interesting trends it's important to emphasize that no predictors reached statistical significance in this study. The model assumptions were mostly satisfied showing no major variance issues and although there were some slight left-skew residuals the overall model fit is considered acceptable.
+The data included 147 nights from 27 participants, within the data we noticed some trends although not statistically significance still peaked our interest. The trends we found were the association of more sleep than usual to a better reported sleep quality as well as a later sleep onset associated with a worse reported sleep quality. Though these are interesting trends it's important to emphasize that no predictors reached statistical significance in this study. The model assumptions were mostly satisfied showing no major variance issues and although there were some slight left-skew residuals the overall model fit is considered acceptable.
 
--   **Takeaways**
+**Takeaways**
 
-    -   Sleep duration is the strongest consistent predictor within our study. However, most other sleep variables showed limited predictive powers. Some relationships exist between key outcomes, but casual predictors are weak overall.
+Sleep duration is the strongest consistent predictor within our study. However, most other sleep variables showed limited predictive powers. Some relationships exist between key outcomes, but casual predictors are weak overall.
 
 ```{r}
 #| echo: false
@@ -171,189 +167,4 @@ corrplot(
 
 ## 5. Appendix {.appendix}
 
-```{r appendix-analysis, echo=FALSE, message=FALSE, warning=FALSE}
-# APPENDIX: REGRESSION ANALYSIS
 
-library(readxl)
-library(dplyr)
-library(ggplot2)
-library(car)
-library(lmtest)
-library(corrplot)
-library(Hmisc)
-library(GGally)
-library(sandwich)
-
-# Load data
-step1 <- suppressWarnings(read_excel(
-  "./merged_diaries_actigraphy.xlsx",
-  sheet = "best_cleaned_analysis_ready"
-))
-
-# Convert time variables
-step1$`Sleep Onset Decimal Hour` <- as.numeric(step1$`Sleep Onset Decimal Hour`)
-step1$`Sleep Offset Time_Decimal Hour` <- as.numeric(step1$`Sleep Offset Time_Decimal Hour`)
-
-# Create variability variables
-sleep_var <- step1 %>%
-  group_by(`Global Participant ID`) %>%
-  summarise(
-    onset_var = sd(`Sleep Onset Decimal Hour`, na.rm = TRUE),
-    offset_var = sd(`Sleep Offset Time_Decimal Hour`, na.rm = TRUE),
-    mean_alertness = mean(`Alertness Rating`, na.rm = TRUE),
-    mean_wake_diff = mean(`Wake Difficulty Rating`, na.rm = TRUE),
-    mean_anxiety = mean(`Anxiety Rating`, na.rm = TRUE),
-    mean_sleep_quality = mean(`Sleep Quality`, na.rm = TRUE),
-    .groups = "drop"
-  )
-
-step1 <- left_join(step1, sleep_var, by = "Global Participant ID")
-
-# Regression models
-alertness3 <- lm(
-  `Alertness Rating` ~ `Sleep Duration` +
-    `Sleep Offset Time_Decimal Hour` +
-    `Sleep Onset Decimal Hour` +
-    onset_var + offset_var,
-  data = step1
-)
-
-wake_diff3 <- lm(
-  `Wake Difficulty Rating` ~ `Sleep Duration` +
-    `Sleep Offset Time_Decimal Hour` +
-    `Sleep Onset Decimal Hour` +
-    onset_var + offset_var,
-  data = step1
-)
-
-anxiety3 <- lm(
-  `Anxiety Rating` ~ `Sleep Duration` +
-    `Sleep Offset Time_Decimal Hour` +
-    `Sleep Onset Decimal Hour` +
-    onset_var + offset_var,
-  data = step1
-)
-
-sleep_quality3 <- lm(
-  `Sleep Quality` ~ `Sleep Duration` +
-    `Sleep Offset Time_Decimal Hour` +
-    `Sleep Onset Decimal Hour` +
-    onset_var + offset_var,
-  data = step1
-)
-
-# Model summaries
-summary(alertness3)
-summary(wake_diff3)
-summary(anxiety3)
-summary(sleep_quality3)
-
-# Breusch-Pagan tests
-bptest(alertness3)
-bptest(wake_diff3)
-bptest(anxiety3)
-bptest(sleep_quality3)
-
-# Multicollinearity check
-vif(alertness3)
-vif(wake_diff3)
-vif(anxiety3)
-vif(sleep_quality3)
-
-# Regression diagnostic plots
-plot(alertness3)
-plot(wake_diff3)
-plot(anxiety3)
-plot(sleep_quality3)
-
-# Dependent-variable correlation matrix
-dep_vars <- step1 %>%
-  select(
-    `Alertness Rating`,
-    `Wake Difficulty Rating`,
-    `Anxiety Rating`,
-    `Sleep Quality`
-  ) %>%
-  filter(complete.cases(.))
-
-cor_results <- rcorr(as.matrix(dep_vars), type = "pearson")
-
-corrplot(
-  cor_results$r,
-  method = "color",
-  type = "upper",
-  diag = FALSE,
-  addCoef.col = "black"
-)
-
-# Scatterplot matrix
-ggpairs(dep_vars)
-
-# Robust standard errors
-coeftest(alertness3, vcov = vcovHC(alertness3, type = "HC3"))
-coeftest(wake_diff3, vcov = vcovHC(wake_diff3, type = "HC3"))
-coeftest(anxiety3, vcov = vcovHC(anxiety3, type = "HC3"))
-coeftest(sleep_quality3, vcov = vcovHC(sleep_quality3, type = "HC3"))
-
-# Main presentation figures
-
-ggplot(step1, aes(x = `Sleep Duration`, y = `Alertness Rating`)) +
-  geom_point(alpha = .5) +
-  geom_smooth(method = "lm", se = TRUE) +
-  theme_minimal() +
-  labs(
-    title = "Sleep Duration Predicting Alertness",
-    x = "Sleep Duration",
-    y = "Alertness Rating"
-  )
-
-ggplot(step1, aes(x = offset_var, y = `Wake Difficulty Rating`)) +
-  geom_point(alpha = .5) +
-  geom_smooth(method = "lm", se = TRUE) +
-  theme_minimal() +
-  labs(
-    title = "Wake-Time Variability Predicting Wake Difficulty",
-    x = "Wake-Time Variability",
-    y = "Wake Difficulty Rating"
-  )
-
-ggplot(step1, aes(x = `Sleep Duration`, y = `Anxiety Rating`)) +
-  geom_point(alpha = .5) +
-  geom_smooth(method = "lm", se = TRUE) +
-  theme_minimal() +
-  labs(
-    title = "Sleep Duration Predicting Anxiety",
-    x = "Sleep Duration",
-    y = "Anxiety Rating"
-  )
-
-ggplot(step1, aes(x = offset_var, y = `Anxiety Rating`)) +
-  geom_point(alpha = .5) +
-  geom_smooth(method = "lm", se = TRUE) +
-  theme_minimal() +
-  labs(
-    title = "Wake-Time Variability Predicting Anxiety",
-    x = "Wake-Time Variability",
-    y = "Anxiety Rating"
-  )
-
-ggplot(step1, aes(x = `Sleep Duration`, y = `Sleep Quality`)) +
-  geom_point(alpha = .5) +
-  geom_smooth(method = "lm", se = TRUE) +
-  theme_minimal() +
-  labs(
-    title = "Sleep Duration Predicting Sleep Quality",
-    x = "Sleep Duration",
-    y = "Sleep Quality"
-  )
-
-ggplot(step1, aes(x = `Sleep Offset Time_Decimal Hour`, y = `Sleep Quality`)) +
-  geom_point(alpha = .5) +
-  geom_smooth(method = "lm", se = TRUE) +
-  theme_minimal() +
-  labs(
-    title = "Wake Time Predicting Sleep Quality",
-    x = "Sleep Offset (Decimal Hour)",
-    y = "Sleep Quality"
-  )
-```
