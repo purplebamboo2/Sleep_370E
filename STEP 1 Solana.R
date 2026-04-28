@@ -440,3 +440,235 @@ corrplot(cor_results$r,
          insig = "blank",
          method = "circle",
          type = "upper")
+
+
+
+
+
+# START UP----
+library(readxl)
+library(dplyr)
+library(ggplot2)
+
+# Prefer using cleaned data from Discrepancy.R if it is already in memory.
+if (exists("new_data")) {
+  sleep_data <- new_data
+} else {
+  sleep_data <- read_excel(file.choose(), na = c("-999", "-888"))
+}
+
+names(sleep_data) <- make.names(names(sleep_data))
+
+time_cols <- c(
+  "Sleep.Onset.Decimal.Hour",
+  "Sleep.Offset.Time_Decimal.Hour",
+  "Nap.Start.Decimal.Time",
+  "Nap.End.Decimal.Time",
+  "First.Meal.Decimal.Time",
+  "Last.Meal.Decimal.Time"
+)
+
+analysis_numeric_cols <- c(
+  "Sleep.Duration",
+  "Physical.Activity.Mins",
+  "Sleep.Quality",
+  "Alertness.Rating",
+  "Wake.Difficulty.Rating"
+)
+
+numeric_cols <- unique(c(time_cols, analysis_numeric_cols))
+
+missing_cols <- setdiff(numeric_cols, names(sleep_data))
+if (length(missing_cols) > 0) {
+  stop(paste("Missing required numeric columns:", paste(missing_cols, collapse = ", ")))
+}
+
+to_numeric_clean <- function(x) {
+  x <- as.character(x)
+  x[x %in% c("L", "-999", "-888", "")] <- NA
+  suppressWarnings(as.numeric(x))
+}
+
+sleep_data[numeric_cols] <- lapply(sleep_data[numeric_cols], to_numeric_clean)
+
+summary(sleep_data)
+
+# Check if the structure looks correct now (should see numeric columns)
+str(sleep_data)
+
+#ROUNDING TIME----
+#--Onset times ----
+Onset_sin <- sin(2 * pi * sleep_data$Sleep.Onset.Decimal.Hour / 24)
+Onset_cos <- cos(2 * pi * sleep_data$Sleep.Onset.Decimal.Hour / 24)
+
+plot(Onset_cos, Onset_sin,
+     asp = 1,
+     xlim = c(-1, 1),
+     ylim = c(-1, 1),
+     pch = 19,
+     main = "Sleep Onset Time (Circular Encoding)")
+
+
+#--Offset times ----
+Offset_sin <- sin(2 * pi * sleep_data$Sleep.Offset.Time_Decimal.Hour / 24)
+Offset_cos <- cos(2 * pi * sleep_data$Sleep.Offset.Time_Decimal.Hour / 24)
+
+plot(Offset_cos, Offset_sin,
+     asp = 1,
+     xlim = c(-1, 1),
+     ylim = c(-1, 1),
+     pch = 19,
+     main = "Sleep Offset Time (Circular Encoding)")
+
+
+Onset_circ <- atan2(Onset_sin, Onset_cos)
+
+sleep_data <- sleep_data %>%
+  mutate(
+    Onset_circ = atan2(Onset_sin, Onset_cos),  
+    Onset_circ = ifelse(Onset_circ < 0, Onset_circ + 2*pi, Onset_circ),  
+    start_hour  = Onset_circ * 24 / (2*pi),     
+    
+    Offset_circ = atan2(Offset_sin, Offset_cos),  
+    Offset_circ = ifelse(Offset_circ < 0, Offset_circ + 2*pi, Offset_circ),  
+    end_hour  = Offset_circ * 24 / (2*pi)     
+  )
+
+
+
+
+
+
+#Start and end plot----
+
+sleep_plot_data <- sleep_data %>%
+  select(Onset_circ, Offset_circ) %>%
+  mutate(id = row_number()) %>%
+  tidyr::pivot_longer(cols = c(Onset_circ, Offset_circ),
+                      names_to = "type", values_to = "angle") 
+
+
+ggplot(sleep_plot_data, aes(x = angle, y = 1, color = type)) +
+  geom_point(size = 3, alpha = 0.7) +
+  coord_polar(theta = "x", start = -pi/2) +  # rotate so 12AM is top
+  scale_x_continuous(
+    limits = c(0, 2*pi),
+    breaks = (0:11) * 2*pi/12,
+    labels = c("12AM","2AM","4AM","6AM","8AM","10AM","12PM",
+               "2PM","4PM","6PM","8PM","10PM")
+  ) +
+  scale_color_manual(values = c("Onset_circ"="darkblue", "Offset_circ"="darkgoldenrod2"),
+                     labels = c("End Time", "Start Time")) +
+  theme_minimal() +
+  theme(axis.title = element_blank(),
+        axis.text.y = element_blank(),
+        axis.ticks = element_blank()) +
+  labs(title = "Sleep Start and End Times (Clock View)", color = "")
+
+
+
+library(readxl)
+library(dplyr)
+library(ggplot2)
+library(tidyr)
+
+source("./excel_date_time_utils.R")
+
+step1 <- suppressWarnings(read_excel(
+  "./merged_diaries_actigraphy.xlsx",
+  sheet = "best_cleaned_analysis_ready"
+))
+
+step1$`Sleep Onset Decimal Hour` <- as.numeric(step1$`Sleep Onset Decimal Hour`)
+step1$`Sleep Offset Time_Decimal Hour` <- as.numeric(step1$`Sleep Offset Time_Decimal Hour`)
+
+# Circular encoding
+step1 <- step1 %>%
+  mutate(
+    Onset_sin = sin(2 * pi * `Sleep Onset Decimal Hour` / 24),
+    Onset_cos = cos(2 * pi * `Sleep Onset Decimal Hour` / 24),
+    
+    Offset_sin = sin(2 * pi * `Sleep Offset Time_Decimal Hour` / 24),
+    Offset_cos = cos(2 * pi * `Sleep Offset Time_Decimal Hour` / 24),
+    
+    Onset_circ = atan2(Onset_sin, Onset_cos),
+    Onset_circ = ifelse(Onset_circ < 0, Onset_circ + 2*pi, Onset_circ),
+    
+    Offset_circ = atan2(Offset_sin, Offset_cos),
+    Offset_circ = ifelse(Offset_circ < 0, Offset_circ + 2*pi, Offset_circ),
+    
+    start_hour = Onset_circ * 24 / (2*pi),
+    end_hour = Offset_circ * 24 / (2*pi)
+  )
+
+# Clock view data
+sleep_plot_data <- step1 %>%
+  select(Onset_circ, Offset_circ) %>%
+  filter(!is.na(Onset_circ), !is.na(Offset_circ)) %>%
+  mutate(id = row_number()) %>%
+  pivot_longer(
+    cols = c(Onset_circ, Offset_circ),
+    names_to = "type",
+    values_to = "angle"
+  )
+
+# Clock plot
+ggplot(sleep_plot_data, aes(x = angle, y = 1, color = type)) +
+  geom_point(size = 3, alpha = 0.7) +
+  coord_polar(theta = "x", start = -pi/2) +
+  scale_x_continuous(
+    limits = c(0, 2*pi),
+    breaks = (0:11) * 2*pi/12,
+    labels = c("12AM","2AM","4AM","6AM","8AM","10AM","12PM",
+               "2PM","4PM","6PM","8PM","10PM")
+  ) +
+  scale_color_manual(
+    values = c("Onset_circ" = "darkblue",
+               "Offset_circ" = "darkgoldenrod2"),
+    labels = c("Start Time", "End Time")
+  ) +
+  theme_minimal() +
+  theme(
+    axis.title = element_blank(),
+    axis.text.y = element_blank(),
+    axis.ticks = element_blank()
+  ) +
+  labs(
+    title = "Sleep Start and End Times (Clock View)",
+    color = ""
+  )
+
+
+
+library(readxl)
+library(dplyr)
+
+step1 <- suppressWarnings(read_excel(
+  "./merged_diaries_actigraphy.xlsx",
+  sheet = "best_cleaned_analysis_ready"
+))
+
+# Convert to numeric
+step1$`Sleep Onset Decimal Hour` <- as.numeric(step1$`Sleep Onset Decimal Hour`)
+step1$`Sleep Offset Time_Decimal Hour` <- as.numeric(step1$`Sleep Offset Time_Decimal Hour`)
+
+# Function for circular mean (in hours)
+circular_mean_hour <- function(time_vec) {
+  time_vec <- time_vec[!is.na(time_vec)]
+  
+  sin_mean <- mean(sin(2 * pi * time_vec / 24))
+  cos_mean <- mean(cos(2 * pi * time_vec / 24))
+  
+  angle <- atan2(sin_mean, cos_mean)
+  if (angle < 0) angle <- angle + 2*pi
+  
+  hour <- angle * 24 / (2*pi)
+  return(hour)
+}
+
+# Compute averages
+avg_sleep_time <- circular_mean_hour(step1$`Sleep Onset Decimal Hour`)
+avg_wake_time  <- circular_mean_hour(step1$`Sleep Offset Time_Decimal Hour`)
+
+avg_sleep_time
+avg_wake_time
