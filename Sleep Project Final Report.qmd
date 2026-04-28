@@ -15,7 +15,13 @@ engine: knitr
 
 ## 1. Introduction
 
-(*paste intro here*)
+Sleep is a critical yet understudied health behavior that influences physical health and well-being. Importantly, research has identified sleep health, which includes multiple sleep parameters above and beyond sleep duration (e.g., quality, consistency, etc.) as a critical intervention target to improve overall public health and target inequities.1-4 Adolescence is a particularly important developmental period in which to address sleep health. Due to a “perfect storm” of biological, psychosocial, and societal influences, good sleep health is rarely achieved during adolescence,5,16 and adolescents struggle to meet the recommended 8-10 hours17,18 of sleep duration required to support healthy cognitive/attention and emotional functioning.5,16 Additionally, inconsistent sleep timing, particularly between weekdays and weekends, has been associated with poor mental health outcomes and increased BMI.19,20 Not only do adolescents struggle to maintain healthy sleep, research has shown that poor sleep in adolescence is associated with continued poor sleep and other mental and physical health consequences in adulthood,21-23 making this period an important window of opportunity for intervention.
+
+Disparities exist in sleep health, with minority youth experiencing worse sleep health compared to White non-Hispanic peers,6 which is proposed to stem from the same racism-related factors that contribute to other health inequities.3,4 One mechanism that has been proposed to explain sleep disparities is stress.1,3 Stress can contribute to poor mental health and increased arousal and hypervigilance both of which have been shown to impact on sleep health.11 Discrimination, a unique stressor that induces feelings of threat, has been associated with worse sleep quality among adolescents even after controlling for other forms of stress.9 However, there may be protective or promotive factors at various levels of influence including individual (e.g., resilience/coping, emotion regulation, substance use, screen time, physical activity, sleep hygiene), family (e.g., sleep environment, family conflict and cohesion, chaos, routines, functioning, resilience), and neighborhood (e.g., safety, community cohesion, light, noise, greenspace) levels that can alter the relations between stress experiences and sleep health. For example, research has demonstrated that children in a low socioeconomic status home with a high quality home environment (e.g., calm, parental involvement/responsivity) exhibit better sleep health.12 In addition, adolescents residing in homes where parents set bedtimes and with better family functioning report better sleep health.14 Further, adolescents residing in neighborhoods with higher levels of cohesion experience fewer sleep problems.15 However, research has not examined protective factors at multiple levels to understand how to most effectively intervene on sleep health.
+
+Drawing on a socioecological model of pediatric sleep health (see Appendix A)4 and responding to recently developed research priorities in sleep disparities,1 the present study seeks to use multiple methods (i.e., surveys, diaries, actigraphs, geocoding) to delineate factors that directly contribute to and/or mitigate experiences of stress and discrimination to promote sleep health in a sample of urban adolescents in Chicago with the ultimate goal of creating a resilience-based sleep health intervention to foster health equity.
+
+Inadequate sleep has widespread effects on health and well-being. Given that sleep is a modifiable health behavior, interventions that target sleep health (e.g., duration, quality, consistency) offer promise for addressing health inequities. Adolescence is a time of inadequate sleep,5 and minority youth report less time, poorer quality, and less consistent sleep than their White peers.6 Identifying key contributing factors to sleep health among urban adolescents is essential to delivering effective interventions.7 One proposed contributor to these health-related disparities is the stress that minority youth experience due to discrimination, racism, and resulting social and structural inequities.8-11 Stress, including daily experiences of discrimination, has been shown to influence sleep, but this has been examined primarily among minority youth residing in small towns and rural settings. Protective factors at various levels of influence including individual, family, and neighborhood may buffer the effect of these stress experiences on sleep health.7,12-15 However, research has not examined protective factors at multiple levels simultaneously to understand how to most effectively intervene on sleep health. The current study will be the first to delineate which factors at the individual, family, and neighborhood levels make important collective contributions to sleep health among a sample of urban adolescents.
 
 ## 2. Methods
 
@@ -29,10 +35,9 @@ engine: knitr
 
 **Descriptive Results**
 
+Descriptive results: Through our upper quartile study on sleep quality we discovered that the top-quartile sleepers had a much longer sleep duration (*275 minutes higher*) as well as lower caffeine (*20% less*) use and less device time (*12 minutes less*) compared to sleepers who were not in the top-quartile. Unexpectedly, top sleepers also had higher anxiety ratings (*1.06 points higher*), more social media use(*18 minutes higher*), and less physical activity(*11.50 minutes less*).
 
-Descriptive results: Through our upper quartile study on sleep quality we discovered that the top-quartile sleepers had a much longer sleep duration (*275 minutes higher*) as well as lower caffeine (*20% less*) use and less device time (*12 minutes less*)  compared to sleepers who were not in the top-quartile. Unexpectedly, top sleepers also had higher anxiety ratings (*1.06 points higher*), more social media use(*18 minutes higher*), and less physical activity(*11.50 minutes less*). 
-
-The average overall wake time was reported to be around 7:30 AM (*7.665845*) and the average sleep time was around 11:00 PM (*23.26906*). 
+The average overall wake time was reported to be around 7:30 AM (*7.665845*) and the average sleep time was around 11:00 PM (*23.26906*).
 
 ```{r circular-sleep-times, echo=FALSE, message=FALSE, warning=FALSE}
 library(readxl)
@@ -109,7 +114,7 @@ ggplot(sleep_plot_data, aes(x = angle, y = 1, color = type)) +
 
 **Regression Results**
 
-The regression study was based on the independent variables: onset time, offset time, onset variability, offset variability, sleep duration and the dependent variables: alertness, anxiety, wake difficulty, and sleep quality. Due to the recurring problem of heteroscedasticity violating the assumption of homoscedasticity in the linear regression analyses conducted for each dependent variable we used an HC3 heteroskedasticity-robust standard errors test to interpret coefficients more accurately. The results showed that sleep duration is a significant predictor for alertness (*p= 0.0096, β= 0.0023*), indicating that longer sleep duration is associated with higher alertness. This made worked with our assumption that a longer/better sleep leads to a stronger sense of alertness throughout the day. 
+The regression study was based on the independent variables: onset time, offset time, onset variability, offset variability, sleep duration and the dependent variables: alertness, anxiety, wake difficulty, and sleep quality. Due to the recurring problem of heteroscedasticity violating the assumption of homoscedasticity in the linear regression analyses conducted for each dependent variable we used an HC3 heteroskedasticity-robust standard errors test to interpret coefficients more accurately. The results showed that sleep duration is a significant predictor for alertness (*p= 0.0096, β= 0.0023*), indicating that longer sleep duration is associated with higher alertness. This made worked with our assumption that a longer/better sleep leads to a stronger sense of alertness throughout the day.
 
 ```{r alertness-duration-plot, echo=FALSE, message=FALSE, warning=FALSE}
 library(readxl)
@@ -139,7 +144,7 @@ ggplot(plot_alertness,
   )
 ```
 
-Another notable result is offset variability as a significant predictor for wake difficulty (*p=0.006, β= -0.720*), indicating that a greater inconsistency in wake time is associated with decreased difficulty. This was particularly interesting as it worked against our assumption that a more consistent wake time would lead to less difficult wake process aka lower wake difficulty ratings. 
+Another notable result is offset variability as a significant predictor for wake difficulty (*p=0.006, β= -0.720*), indicating that a greater inconsistency in wake time is associated with decreased difficulty. This was particularly interesting as it worked against our assumption that a more consistent wake time would lead to less difficult wake process aka lower wake difficulty ratings.
 
 ```{r wake-offset-variability-plot, echo=FALSE, message=FALSE, warning=FALSE}
 library(readxl)
@@ -179,11 +184,12 @@ ggplot(plot_wake_offset,
   )
 ```
 
-There were no other significant results for the remaining dependent variables: anxiety and sleep quality. However this is not to say that there are no predictors for these variables but just that there is further analysis that can be done to get a better grasp at what indicates anxiety and sleep quality reports from adolescents. 
+There were no other significant results for the remaining dependent variables: anxiety and sleep quality. However this is not to say that there are no predictors for these variables but just that there is further analysis that can be done to get a better grasp at what indicates anxiety and sleep quality reports from adolescents.
 
 **Correlation Results**
 
 We also looked into correlation between the dependent variables and found moderate correlations between alertness & wake difficulty (*r=0.42*), alertness & sleep quality (*r=0.31*), and anxiety & sleep quality (*r=0.30*).
+
 ```{r correlation-heatmap, echo=FALSE, message=FALSE, warning=FALSE}
 library(readxl)
 library(dplyr)
@@ -222,7 +228,8 @@ corrplot(
   insig = "blank"
 )
 ```
-All of the reported correlations are positive, showing us that the variables tend to increase together. The relationships are meaningful however they are not strong showing a range of around 0.3-0.4 for r. Higher alertness is associated with both easier wake times and better sleep quality which matches up with our assumptions on the effects of sleep quality on alertness. However, it also adds the additional perspective that an easier reported wake time is associated with higher alertness, something we didn’t think to look into prior to this analysis. The correlation that anxiety has with sleep suggests that a higher anxiety is linked to a worse perceived sleep quality, this makes sense as someone who isn’t as well rested may report a stronger sense of anxiety due to the lack of rest. These results indicate the dependent variables are related but not redundant meaning they capture overlapping but distinct aspects of the adolescent sleep experience within our data. Overall, the results support the idea that subjective sleep experiences/ratings are interconnected. 
+
+All of the reported correlations are positive, showing us that the variables tend to increase together. The relationships are meaningful however they are not strong showing a range of around 0.3-0.4 for r. Higher alertness is associated with both easier wake times and better sleep quality which matches up with our assumptions on the effects of sleep quality on alertness. However, it also adds the additional perspective that an easier reported wake time is associated with higher alertness, something we didn’t think to look into prior to this analysis. The correlation that anxiety has with sleep suggests that a higher anxiety is linked to a worse perceived sleep quality, this makes sense as someone who isn’t as well rested may report a stronger sense of anxiety due to the lack of rest. These results indicate the dependent variables are related but not redundant meaning they capture overlapping but distinct aspects of the adolescent sleep experience within our data. Overall, the results support the idea that subjective sleep experiences/ratings are interconnected.
 
 **Mixed Effects Results**
 
@@ -243,8 +250,36 @@ Sleep duration is the strongest consistent predictor within our study. However, 
 
 ## 4. Conclusions/Future Work
 
-(*paste conclusion here*)
+In this project we worked as a data consulting team to clean and merge adolescent sleep data from the PUSH study, with some analysis at the end. Our work involved resolving discrepancies between multiple datasets. Mainly, handling missing values and outliers as well as integrating sleep diary data with actigraphy measures to create an analysis-ready dataset. After preparing the data, we conducted descriptive analyses, regression models, correlation tests, and mixed effects modeling to explore relationships between sleep patterns and outcomes such as alertness, anxiety, wake difficulty, and overall sleep quality.
+
+The results showed some noticeable patterns. Descriptively, adolescents in the top quartile of sleep tended to have longer sleep duration and healthier behavioral patterns, such as lower caffeine use and reduced device time. Surprisingly, some unexpected trends such as higher anxiety and social media use were also observed. When we ran our regression analyses, we found that sleep duration was a significant predictor of alertness. This indicates that longer sleep is associated with improved alertness the next day. We also found that sleep offset variability significantly predicted wake difficulty. Despite these findings many predictors were not statistically significant across models. Mixed effects modeling showed that while the direction of relationships has some backing, these effects were not strong enough to reach significance in this sample. Finally, the correlation analyses supported moderate relationships between alertness, wake difficulty, and sleep quality.
+
+Had we have had more time, we would encourage the researchers to expand the sample size and duration of data collection. This would greatly boost the statistical power and better capture the variability in sleep patterns. This of course is not an easy task, as adolescents are not always taking surveys with the most serious intentions. In terms of analyses, we have a strong set of techniques. However, these techniques are only as good as the data is to analyze, further pushing the need for better data.
 
 ## 5. Appendix {.appendix}
 
+## 6. References
 
+1.  Jackson CL, Walker JR, Brown MK, Das R, Jones NL. A workshop report on the causes and consequences of sleep health disparities. Sleep. 2020;43(8):zsaa037.
+2.  Hale L, Troxel W, Buysse DJ. Sleep health: An opportunity for public health to address health equity. Annual review of public health. 2020;41:81-99.
+3.  Billings ME, Cohen RT, Baldwin CM, et al. Disparities in sleep health and potential intervention models: a focused review. Chest. 2021;159(3):1232-1240.
+4.  Meltzer LJ, Williamson AA, Mindell JA. Pediatric sleep health: it matters, and so does how we define it. Sleep medicine reviews. 2021;57:101425.
+5.  Crowley SJ, Wolfson AR, Tarokh L, Carskadon MA. An update on adolescent sleep: New evidence informing the perfect storm model. Journal of Adolescence. 2018;67:55-65.
+6.  Guglielmo D, Gazmararian JA, Chung J, Rogers AE, Hale L. Racial/ethnic sleep disparities in US school-aged children and adolescents: a review of the literature. Sleep Health. 2018;4(1):68-80.
+7.  Mayne SL, Mitchell JA, Virudachalam S, Fiks AG, Williamson AA. Neighborhood environments and sleep among children and adolescents: A systematic review. Sleep Medicine Reviews. 2021:101465.
+8.  Zeiders KH. Discrimination, daily stress, sleep, and Mexican-origin adolescents’ internalizing symptoms. Cultural diversity and ethnic minority psychology. 2017;23(4):570.
+9.  Huynh VW, Gillen-O’Neel C. Discrimination and sleep: The protective role of school belonging. Youth & Society. 2016;48(5):649-672.
+10. Majeno A, Tsai KM, Huynh VW, McCreath H, Fuligni AJ. Discrimination and sleep difficulties during adolescence: The mediating roles of loneliness and perceived stress. Journal of youth and adolescence. 2018;47(1):135-147.
+11. Goosby BJ, Straley E, Cheadle JE. Discrimination, sleep, and stress reactivity: Pathways to African American-White cardiometabolic risk inequities. Population Research and Policy Review. 2017;36(5):699-716.
+12. Doane LD, Breitenstein RS, Beekman C, Clifford S, Smith TJ, Lemery-Chalfant K. Early life socioeconomic disparities in children’s sleep: the mediating role of the current home environment. Journal of youth and adolescence. 2019;48(1):56-70.
+13. Hoyt LT, Maslowsky J, Olson JS, Harvey AG, Deardorff J, Ozer EJ. Adolescent sleep barriers: profiles within a diverse sample of urban youth. Journal of youth and adolescence. 2018;47(10):2169-2180.
+14. Khor SP, McClure A, Aldridge G, Bei B, Yap MB. Modifiable parental factors in adolescent sleep: A systematic review and meta-analysis. Sleep Medicine Reviews. 2021;56:101408.
+15. Troxel WM, Shih RA, Ewing B, Tucker JS, Nugroho A, D’Amico EJ. Examination of neighborhood disadvantage and sleep in a multi-ethnic cohort of adolescents. Health & place. 2017;45:39-45.
+16. Carskadon MA. Sleep in adolescents: the perfect storm. Pediatric Clinics. 2011;58(3):637-647.
+17. Hirshkowitz M, Whiton K, Albert SM, et al. National Sleep Foundation’s sleep time duration recommendations: methodology and results summary. Sleep health. 2015;1(1):40-43.
+18. Paruthi S, Brooks LJ, D'Ambrosio C, et al. Consensus statement of the American Academy of Sleep Medicine on the recommended amount of sleep for healthy children: methodology and discussion. Journal of clinical sleep medicine. 2016;12(11):1549-1561.
+19. Mathew GM, Hale L, Chang A-M. Social jetlag, eating behaviours and BMI among adolescents in the USA. British Journal of Nutrition. 2020;124(9):979-987.
+20. Mathew GM, Li X, Hale L, Chang A-M. Sleep duration and social jetlag are independently associated with anxious symptoms in adolescents. Chronobiology international. 2019;36(4):461-469.
+21. Dregan A, Armstrong D. Adolescence sleep disturbances as predictors of adulthood sleep disturbances—a cohort study. Journal of Adolescent Health. 2010;46(5):482-487.
+22. Kuo SI, Updegraff KA, Zeiders KH, McHale SM, Umaña-Taylor AJ, De Jesús SAR. Mexican American adolescents’ sleep patterns: Contextual correlates and implications for health and adjustment in young adulthood. Journal of youth and adolescence. 2015;44(2):346-361.
+23. Owens J, Group ASW. Insufficient sleep in adolescents and young adults: an update on causes and consequences. Pediatrics. 2014;134(3):e921-e932.
