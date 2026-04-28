@@ -29,7 +29,11 @@ engine: knitr
 
 **Descriptive Results**
 
-Through our upper quartile study on sleep quality we discovered that the top-quartile sleepers had a much longer sleep duration as well as lower caffeine use and less device time compared to sleepers who were not in the top-quartile. Unexpectedly, top sleepers also had higher anxiety ratings, more social media use, and less physical activity.
+
+Descriptive results: Through our upper quartile study on sleep quality we discovered that the top-quartile sleepers had a much longer sleep duration (*275 minutes higher*) as well as lower caffeine (*20% less*) use and less device time (*12 minutes less*)  compared to sleepers who were not in the top-quartile. Unexpectedly, top sleepers also had higher anxiety ratings (*1.06 points higher*), more social media use(*18 minutes higher*), and less physical activity(*11.50 minutes less*). 
+
+The average overall wake time was reported to be around 7:30 AM (*7.665845*) and the average sleep time was around 11:00 PM (*23.26906*). 
+
 ```{r circular-sleep-times, echo=FALSE, message=FALSE, warning=FALSE}
 library(readxl)
 library(dplyr)
@@ -105,7 +109,7 @@ ggplot(sleep_plot_data, aes(x = angle, y = 1, color = type)) +
 
 **Regression Results**
 
-The regression study was based on the independent variables: onset time, offset time, onset variability, offset variability, sleep duration and the dependent variables: alertness, anxiety, wake difficulty, and sleep quality. Due to the recurring problem of heteroscedasticity violating the assumption of homoscedasticity in the linear regression analyses conducted for each dependent variable we used an HC3 heteroskedasticity-robust standard errors test to interpret coefficients more accurately. The results showed that sleep duration is a significant predictor for alertness (*p= 0.0096, β= 0.0023*), indicating that longer sleep duration is associated with higher alertness.
+The regression study was based on the independent variables: onset time, offset time, onset variability, offset variability, sleep duration and the dependent variables: alertness, anxiety, wake difficulty, and sleep quality. Due to the recurring problem of heteroscedasticity violating the assumption of homoscedasticity in the linear regression analyses conducted for each dependent variable we used an HC3 heteroskedasticity-robust standard errors test to interpret coefficients more accurately. The results showed that sleep duration is a significant predictor for alertness (*p= 0.0096, β= 0.0023*), indicating that longer sleep duration is associated with higher alertness. This made worked with our assumption that a longer/better sleep leads to a stronger sense of alertness throughout the day. 
 
 ```{r alertness-duration-plot, echo=FALSE, message=FALSE, warning=FALSE}
 library(readxl)
@@ -135,7 +139,7 @@ ggplot(plot_alertness,
   )
 ```
 
-Another notable result is offset variability as a significant predictor for wake difficulty (*p=0.006, β= -0.720*), indicating that a greater inconsistency in wake time is associated with decreased difficulty.
+Another notable result is offset variability as a significant predictor for wake difficulty (*p=0.006, β= -0.720*), indicating that a greater inconsistency in wake time is associated with decreased difficulty. This was particularly interesting as it worked against our assumption that a more consistent wake time would lead to less difficult wake process aka lower wake difficulty ratings. 
 
 ```{r wake-offset-variability-plot, echo=FALSE, message=FALSE, warning=FALSE}
 library(readxl)
@@ -177,7 +181,7 @@ ggplot(plot_wake_offset,
 
 **Correlation Results**
 
-We also looked into correlation between the dependent variables and found significant correlations between alertness & wake difficulty (r=0.42), alertness & sleep quality (*r=0.31*), and anxiety & sleep quality (*r=0.30*).
+We also looked into correlation between the dependent variables and found significant correlations between alertness & wake difficulty (*r=0.42*), alertness & sleep quality (*r=0.31*), and anxiety & sleep quality (*r=0.30*).
 ```{r correlation-heatmap, echo=FALSE, message=FALSE, warning=FALSE}
 library(readxl)
 library(dplyr)
