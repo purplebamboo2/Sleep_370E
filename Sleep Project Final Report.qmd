@@ -179,9 +179,11 @@ ggplot(plot_wake_offset,
   )
 ```
 
+There were no other significant results for the remaining dependent variables: anxiety and sleep quality. However this is not to say that there are no predictors for these variables but just that there is further analysis that can be done to get a better grasp at what indicates anxiety and sleep quality reports from adolescents. 
+
 **Correlation Results**
 
-We also looked into correlation between the dependent variables and found significant correlations between alertness & wake difficulty (*r=0.42*), alertness & sleep quality (*r=0.31*), and anxiety & sleep quality (*r=0.30*).
+We also looked into correlation between the dependent variables and found moderate correlations between alertness & wake difficulty (*r=0.42*), alertness & sleep quality (*r=0.31*), and anxiety & sleep quality (*r=0.30*).
 ```{r correlation-heatmap, echo=FALSE, message=FALSE, warning=FALSE}
 library(readxl)
 library(dplyr)
@@ -220,6 +222,8 @@ corrplot(
   insig = "blank"
 )
 ```
+All of the reported correlations are positive, showing us that the variables tend to increase together. The relationships are meaningful however they are not strong showing a range of around 0.3-0.4 for r. Higher alertness is associated with both easier wake times and better sleep quality which matches up with our assumptions on the effects of sleep quality on alertness. However, it also adds the additional perspective that an easier reported wake time is associated with higher alertness, something we didn’t think to look into prior to this analysis. The correlation that anxiety has with sleep suggests that a higher anxiety is linked to a worse perceived sleep quality, this makes sense as someone who isn’t as well rested may report a stronger sense of anxiety due to the lack of rest. These results indicate the dependent variables are related but not redundant meaning they capture overlapping but distinct aspects of the adolescent sleep experience within our data. Overall, the results support the idea that subjective sleep experiences/ratings are interconnected. 
+
 **Mixed Effects Results**
 
 The data included 147 nights from 27 participants, within the data we noticed some trends although not statistically significance still peaked our interest. The trends we found were the association of more sleep than usual to a better reported sleep quality as well as a later sleep onset associated with a worse reported sleep quality. Though these are interesting trends it's important to emphasize that no predictors reached statistical significance in this study. The model assumptions were mostly satisfied showing no major variance issues and although there were some slight left-skew residuals the overall model fit is considered acceptable.
