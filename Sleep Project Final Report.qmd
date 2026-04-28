@@ -1,0 +1,71 @@
+---
+title: "Sleep Project Final Report"
+author: "Solana Tabor, Ramsay, Zane"
+format: pdf
+engine: knitr
+---
+
+## Table of Contents
+
+1.  Introduction
+2.  Methods
+3.  Results
+4.  Conclusion
+5.  Appendix
+
+## 1. Introduction
+
+(*paste intro here*)
+
+## 2. Methods
+
+(*paste methods here*)
+
+#### Step by Step Explanation (add if wanted):
+
+-   **Set up** (*add if wanted*)
+
+## 3. Results
+
+-   **Descriptive Results**
+
+    -   Through our upper quartile study on sleep quality we discovered that the top-quartile sleepers had a much longer sleep duration as well as lower caffeine use and less device time compared to sleepers who were not in the top-quartile. Unexpectedly, top sleepers also had higher anxiety ratings, more social media use, and less physical activity.
+
+-   **Regression Results**
+
+    -   The regression study was based on the independent variables: onset time, offset time, onset variability, offset variability, sleep duration and the dependent variables: alertness, anxiety, wake difficulty, and sleep quality. Due to the recurring problem of heteroscedasticity violating the assumption of homoscedasticity in the linear regression analyses conducted for each dependent variable we used an HC3 heteroskedasticity-robust standard errors test to interpret coefficients more accurately. The results showed that sleep duration is a significant predictor for alertness (*p= 0.0096, β= 0.0023*), indicating that longer sleep duration is associated with higher alertness. Another notable result is offset variability as a significant predictor for wake difficulty (*p=0.006, β= -0.720*), indicating that a greater inconsistency in wake time is associated with decreased difficulty
+
+-   **Correlation Results**
+
+    -   We also looked into correlation between the dependent variables and found significant correlations between alertness & wake difficulty (r=0.42), alertness & sleep quality (*r=0.31*), and anxiety & sleep quality (*r=0.30*).
+
+-   **Mixed Effects Results**
+
+    -   The data included 147 nights from 27 participants, within the data we noticed some trends although not statistically significance still peaked our interest. The trends we found were the association of more sleep than usual to a better reported sleep quality as well as a later sleep onset associated with a worse reported sleep quality. Though these are interesting trends it's important to emphasize that no predictors reached statistical significance in this study. The model assumptions were mostly satisfied showing no major variance issues and although there were some slight left-skew residuals the overall model fit is considered acceptable.
+
+-   **Takeaways**
+
+    -   Sleep duration is the strongest consistent predictor within our study. However, most other sleep variables showed limited predictive powers. Some relationships exist between key outcomes, but casual predictors are weak overall.
+
+```{r}
+#| echo: false
+#| label: (add label)
+
+#PASTE DATA FOR PLOT HERE
+
+
+```
+
+## 4. Conclusions/Future Work
+
+(*paste conclusion here*)
+
+## 5. Appendix {.appendix}
+
+```{r}
+#| echo: true
+#| label: Appendix
+
+#ALL OF OUR DATA
+
+```
