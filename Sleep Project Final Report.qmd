@@ -1,6 +1,6 @@
 ---
 title: "Sleep Project Final Report"
-author: "Solana Tabor, Ramsay, Zane Eldadah"
+author: "Solana Tabor, Ramsay Barlow, Zane Eldadah"
 format: pdf
 engine: knitr
 ---
