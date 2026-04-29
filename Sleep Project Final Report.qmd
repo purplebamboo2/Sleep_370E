@@ -25,11 +25,74 @@ Inadequate sleep has widespread effects on health and well-being. Given that sle
 
 ## 2. Methods
 
-(*paste methods here*)
+For this project, we used PUSH adolescent daily diary, and autography data. This data recorded various metrics related to sleep, and can be found in the appendix. The diary data came from two separate files that were hand recorded. To ensure that the data was as accurate as possible, we had two separate researchers transcribe data, and then we compared the data to account for possible errors. The actigraphy data was collected from a wearable band by the subjects of the study, and was merged with diary data for each participant. Even after cleaning the diary data, we still had issues with interpreting some of the results from the subjective data, and in the end, we were left with 172 participant nights from 28 participants that were able to be used for analysis.
 
-#### Step by Step Explanation (add if wanted):
+The two separate diaries that were reconciled contained many missing value codes that we converted to NA. We standardized column names after gaining access to the data sets and used one cleaned diary file as the base, filling in missing values from the second clean file when available. After the handwritten diaries were combined, we then combined it with online diary data in the same sleep study to have one overarching diary data set, which we can then merge with the actigraphy data set. This way, we ensure that everything is combined correctly and accurately, so that we can evaluate sleep profiles completely.
 
-**Set up** (*add if wanted*)
+In the merge data set, the date and clock fields arrived in various mixed formats, such as Excel serial dates, text dates, and POSIX datetimes. We converted all of these types to one standard date format. For time fields in the data set that were of a different format, if the clock and decimal versions agreed within five minutes, the clock entry was used. If there was a decimal value that looked like clock notation, such as 7.45, it was treated as clock notation, especially when 7:45 was a time recorded for that same person in a different diary data set. If two versions of a time entry deferred by 12 hours, the discrepancy was treated as an AM/PM flip. If a time entry could not be cleanly reconciled, we flagged it for manual review and removed it from an analysis ready data set until the data could be manually verified.
+
+We merged datasets by participant IDs into a common PUSH_### format. We then converted study day labels such as "Day 3" to numeric day values. We merged diary and autography data by the normalized participant ID and study day. We did this instead of merging by date alone, since diary dates and actigraphy dates sometimes differed by one calendar day, which we attribute to manual transcription error. After merging, we were left with 180 matched diary actigraphy rows, 125 diary only rows, and 24 actigraphy only rows. For this study, we only considered matched rows for the main analysis. For the main analysis data set, we kept 172 matched rows, where rows were kept if dates matched exactly, differed by only one day, had a missing diary date but valid actigraphy date, or had an obvious year typo that could be edited. More specifically, 61 rows had matching raw dates, 87 rows had a one day diary actigraphy difference, 16 rows had a missing diary date but valid actigraphy date, and 8 rows had an obvious year typo and were repaired. Of the 180 rows, we kept only 172, since eight matched rows had date gaps that were too large to confidently treat as the same sleep episode. We emphasize that diary only and actigraphy only rows are not necessarily bad, they were just excluded from paired analysis because they lacked the information necessary for diary actigraphy modeling.
+
+We created several variables for our data set. The first is Screen Time total, which combines hours and minutes for things like television, videos, video chat, social media, and more. We specified the variable as such: 
+
+$$
+\text{Total Minutes}_{ij} = 60 \times \text{Hours}_{ij} + \text{Minutes}_{ij}
+$$
+
+We also created weekend night indicators for Friday and Saturday night and summer break indicators using Chicago public school school calendar windows. For sleep timing variables, sleep onset and offset were represented as decimal hours, and to account for this, we used a circular encoding of time because it wraps cleanly around midnight. The variables are specified as such:
+
+$$
+\theta_{ij} = \frac{2\pi t_{ij}}{24}, \qquad
+s_{ij} = \sin(\theta_{ij}), \qquad
+c_{ij} = \cos(\theta_{ij})
+$$
+
+$$
+\bar{t} =
+\frac{24}{2\pi}
+\left[
+\operatorname{atan2}\left(\bar{s}, \bar{c}\right) \bmod 2\pi
+\right]
+$$
+
+We also defined the categories of "good sleeper" and "bad sleeper". Daily top quartile sleep nights were defined using self-reported sleep quality, with 75th percentile cut off was 9, so nights with sleep quality at least 9 were defined as top quartile nights. Participant level good sleepers were defined by each participant's mean sleep quality, where the participant-level 75th percentile cutoff was about 8.08: 
+
+$$
+\bar{Q}_j = \frac{1}{n_j}\sum_{i=1}^{n_j} Q_{ij}
+$$
+
+$$
+\text{GoodSleeper}_j =
+\mathbf{1}\left(\bar{Q}_j \geq Q_{0.75}(\bar{Q})\right)
+$$
+
+We were interested in linear regression and mixed effects modeling for analysis of our data set. The mixed affects model is key because repeated nights are nested within participants, meaning that observations from the same adolescent are not necessarily independent. Therefore, the mixed effects model addresses this by giving each participant their own personal random intercept. We calculated the ICC to be about 0.13, so some clustering by participant existed.
+
+The main mixed effects model predicted sleep quality from sleep duration, sleep, onset, weekend, and summer break, and the model we used is the following:
+
+$$
+\text{DurationWithin}_{ij}
+=
+\text{Duration}_{ij} - \bar{\text{Duration}}_j
+$$
+
+$$
+Q_{ij}
+=
+\beta_0
++ \beta_1 \text{DurationWithin}_{ij}
++ \beta_2 \bar{\text{Duration}}_j
+$$\newline
+$$
++ \beta_3 \text{OnsetWithin}_{ij}
++ \beta_4 \bar{\text{Onset}}_j
++ \beta_5 \text{Weekend}_{ij}
++ \beta_6 \text{Summer}_{ij}
++ b_{0j}
++ \varepsilon_{ij}
+$$
+
+The model used complete cases for the variables included in that model. Here, we used 147 nights from 27 participants. It is also important to note that all analysis should be interpreted as association, and not causal effect. We also note that good sleeper status is an empirical classification within the sample, and is not from a clinical diagnosis. 
 
 ## 3. Results
 
@@ -257,6 +320,8 @@ The results showed some noticeable patterns. Descriptively, adolescents in the t
 Had we have had more time, we would encourage the researchers to expand the sample size and duration of data collection. This would greatly boost the statistical power and better capture the variability in sleep patterns. This of course is not an easy task, as adolescents are not always taking surveys with the most serious intentions. In terms of analyses, we have a strong set of techniques. However, these techniques are only as good as the data is to analyze, further pushing the need for better data.
 
 ## 5. Appendix {.appendix}
+
+All code can be found at the following GitHub repository: https://github.com/purplebamboo2/Sleep_370E
 
 ## 6. References
 
